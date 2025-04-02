@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  clerkId        String          @unique
+  email          String          @unique
+  name           String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  scrapeRequests ScrapeRequest[]
+}
+
+model InstagramProfile {
+  id             String          @id @default(cuid())
+  username       String          @unique
+  fullName       String?
+  bio            String?
+  profilePicUrl  String?
+  followersCount Int?
+  followingCount Int?
+  postsCount     Int?
+  isVerified     Boolean         @default(false)
+  isPrivate      Boolean         @default(false)
+  lastScraped    DateTime        @default(now())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  posts          Post[]
+  reels          Reel[]
+  scrapeRequests ScrapeRequest[]
+}
+
+model Post {
+  id                 String           @id @default(cuid())
+  postId             String           @unique
+  shortcode          String           @unique
+  caption            String?
+  mediaType          String?
+  mediaUrl           String?
+  likesCount         Int?
+  commentsCount      Int?
+  timestamp          DateTime?
+  instagramProfileId String
+  instagramProfile   InstagramProfile @relation(fields: [instagramProfileId], references: [id], onDelete: Cascade)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([instagramProfileId])
+}
+
+model Reel {
+  id                 String           @id @default(cuid())
+  reelId             String           @unique
+  shortcode          String           @unique
+  caption            String?
+  mediaUrl           String?
+  viewsCount         Int?
+  likesCount         Int?
+  commentsCount      Int?
+  timestamp          DateTime?
+  instagramProfileId String
+  instagramProfile   InstagramProfile @relation(fields: [instagramProfileId], references: [id], onDelete: Cascade)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([instagramProfileId])
+}
+
+model ScrapeRequest {
+  id                 String            @id @default(cuid())
+  username           String
+  status             String            @default("pending") // pending, processing, completed, failed
+  priority           Int               @default(1)
+  userId             String
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instagramProfileId String?
+  instagramProfile   InstagramProfile? @relation(fields: [instagramProfileId], references: [id])
+  error              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([instagramProfileId])
+}

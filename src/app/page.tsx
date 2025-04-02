@@ -1,102 +1,161 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight, Check, Instagram, Search } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { userId } = auth();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="relative overflow-hidden bg-white">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 opacity-70" />
+
+      <div className="relative pt-24 pb-32 sm:pt-32 sm:pb-40">
+        <div className="container mx-auto px-4">
+          <nav className="flex justify-between items-center mb-16 absolute top-0 left-0 right-0 px-4 py-6">
+            <div className="text-2xl font-bold">InstaScrapr</div>
+            <div className="space-x-4">
+              {userId ? (
+                <Link
+                  href="/dashboard"
+                  className="px-6 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:opacity-90 transition-opacity"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    className="px-6 py-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    className="px-6 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:opacity-90 transition-opacity"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+          </nav>
+
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-8 tracking-tight">
+              Unlock{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">
+                Instagram
+              </span>{" "}
+              Analytics in Seconds
+            </h1>
+
+            <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Enter any Instagram handle and instantly get profile insights,
+              post metrics, and engagement analytics. Make data-driven decisions
+              without the guesswork.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {userId ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity text-lg font-medium"
+                >
+                  Go to Dashboard
+                  <ArrowUpRight className="ml-2 w-5 h-5" />
+                </Link>
+              ) : (
+                <Link
+                  href="/sign-up"
+                  className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity text-lg font-medium"
+                >
+                  Try It Free
+                  <ArrowUpRight className="ml-2 w-5 h-5" />
+                </Link>
+              )}
+
+              <Link
+                href="#pricing"
+                className="inline-flex items-center px-8 py-4 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-lg font-medium"
+              >
+                View Pricing
+              </Link>
+            </div>
+
+            <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-500" />
+                <span>No Instagram login required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-500" />
+                <span>Unlimited searches</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-500" />
+                <span>Export analytics data</span>
+              </div>
+            </div>
+
+            {/* Search bar mockup */}
+            <div className="mt-16 max-w-2xl mx-auto bg-white p-4 rounded-xl shadow-lg">
+              <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
+                <div className="px-3 py-2 bg-gray-50">
+                  <Instagram className="w-5 h-5 text-gray-500" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter Instagram handle (e.g., @username)"
+                  className="flex-1 px-4 py-3 outline-none text-gray-700"
+                  disabled
+                />
+                <button className="px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium flex items-center">
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Try our tool with your favorite Instagram profiles
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </div>
+
+      {/* Footer */}
+      <footer className="py-8 bg-gray-50 text-gray-600 border-t border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <div className="text-xl font-bold">InstaScrapr</div>
+              <p className="text-gray-500">Instagram Analytics Tool</p>
+            </div>
+            <div className="flex space-x-6">
+              <Link
+                href="/privacy"
+                className="hover:text-purple-600 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="/terms"
+                className="hover:text-purple-600 transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                href="/contact"
+                className="hover:text-purple-600 transition-colors"
+              >
+                Contact Us
+              </Link>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-500">
+            &copy; {new Date().getFullYear()} InstaScrapr. All rights reserved.
+          </div>
+        </div>
       </footer>
     </div>
   );
