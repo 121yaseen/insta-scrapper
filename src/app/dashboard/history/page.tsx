@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { History, Search, ArrowUpRight, ExternalLink } from "lucide-react";
+import {
+  History,
+  Search,
+  ArrowUpRight,
+  ExternalLink,
+  RefreshCw,
+} from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 interface ScrapeRequest {
   id: string;
@@ -12,50 +19,29 @@ interface ScrapeRequest {
   createdAt: string;
   updatedAt: string;
   error?: string;
+  profilePicUrl?: string;
 }
 
 export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [scrapeRequests, setScrapeRequests] = useState<ScrapeRequest[]>([]);
+  const [retryingRequest, setRetryingRequest] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchScrapeHistory() {
       try {
         setLoading(true);
 
-        // In a real app, you'd fetch this from your API
-        // For now, let's generate mock data
-        const mockRequests: ScrapeRequest[] = Array.from(
-          { length: 10 },
-          (_, i) => {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
+        // Fetch data from our API
+        const response = await fetch("/api/history");
 
-            const statuses = [
-              "completed",
-              "completed",
-              "completed",
-              "failed",
-              "pending",
-            ];
-            const status =
-              statuses[Math.floor(Math.random() * statuses.length)];
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch history");
+        }
 
-            return {
-              id: `req-${i}`,
-              username: `instagram_user_${10 - i}`,
-              status,
-              createdAt: date.toISOString(),
-              updatedAt: date.toISOString(),
-              error:
-                status === "failed"
-                  ? "Failed to fetch Instagram profile data"
-                  : undefined,
-            };
-          }
-        );
-
-        setScrapeRequests(mockRequests);
+        const data = await response.json();
+        setScrapeRequests(data.scrapeRequests);
       } catch (error) {
         console.error("Error fetching scrape history:", error);
       } finally {
@@ -66,8 +52,46 @@ export default function HistoryPage() {
     fetchScrapeHistory();
   }, []);
 
+  const handleRetry = async (requestId: string) => {
+    try {
+      setRetryingRequest(requestId);
+
+      const response = await fetch("/api/scrape/retry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ requestId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to retry request");
+      }
+
+      // Update the request status in the UI
+      setScrapeRequests((prevRequests) =>
+        prevRequests.map((req) =>
+          req.id === requestId
+            ? { ...req, status: "pending", error: undefined }
+            : req
+        )
+      );
+
+      toast.success("Request has been queued for retry");
+    } catch (error) {
+      console.error("Error retrying request:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to retry request"
+      );
+    } finally {
+      setRetryingRequest(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <Toaster position="top-center" />
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-4">
@@ -165,8 +189,23 @@ export default function HistoryPage() {
                         className="hover:bg-gray-50 transition-colors"
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-800">
-                            @{request.username}
+                          <div className="flex items-center">
+                            {request.profilePicUrl ? (
+                              <img
+                                src={request.profilePicUrl}
+                                alt={`@${request.username}`}
+                                className="w-8 h-8 rounded-full object-cover mr-3"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
+                                <span className="text-xs text-gray-500">
+                                  {request.username.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                            <div className="text-sm font-medium text-gray-800">
+                              @{request.username}
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -207,14 +246,18 @@ export default function HistoryPage() {
                             </Link>
                           ) : request.status === "failed" ? (
                             <button
-                              onClick={() =>
-                                alert(
-                                  `Retry functionality would be implemented in a real app`
-                                )
-                              }
-                              className="text-purple-600 hover:text-purple-900"
+                              onClick={() => handleRetry(request.id)}
+                              disabled={retryingRequest === request.id}
+                              className="inline-flex items-center text-purple-600 hover:text-purple-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Retry
+                              {retryingRequest === request.id ? (
+                                <>
+                                  <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                                  Retrying...
+                                </>
+                              ) : (
+                                "Retry"
+                              )}
                             </button>
                           ) : (
                             <span className="text-gray-400">Processing</span>
