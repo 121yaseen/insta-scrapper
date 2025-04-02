@@ -6,7 +6,8 @@ import sys
 import traceback
 import json
 import re
-from datetime import datetime
+import argparse
+from datetime import datetime, timedelta
 
 print("Python version:", sys.version)
 print("Starting Instagram Scraper...")
@@ -1041,23 +1042,109 @@ def read_usernames_from_file(filename):
         return ["yaa.scene", "__josen__j_"]  # Default to the two test usernames
 
 def save_profile_data_array(data_array, filename):
-    """Saves the profile data array to a JSON file."""
+    """Saves the profile data array to a JSON file.
+    If the file exists, it will append new data and update existing entries."""
+    existing_data = []
+    existing_usernames = set()
+    
     try:
+        # Try to open and read existing data
+        if os.path.exists(filename) and os.path.getsize(filename) > 0:
+            with open(filename, 'r', encoding='utf-8') as f:
+                try:
+                    existing_data = json.load(f)
+                    # Create a set of existing usernames for faster lookup
+                    existing_usernames = {profile.get('username') for profile in existing_data}
+                    print(f"Loaded existing data with {len(existing_data)} profiles")
+                except json.JSONDecodeError:
+                    print(f"Error parsing existing JSON file: {filename}. Creating a new file.")
+                    existing_data = []
+        
+        # Update existing entries or append new ones
+        for new_profile in data_array:
+            username = new_profile.get('username')
+            if username in existing_usernames:
+                # Replace the existing profile with the new one
+                for i, profile in enumerate(existing_data):
+                    if profile.get('username') == username:
+                        existing_data[i] = new_profile
+                        print(f"Updated existing profile for {username}")
+                        break
+            else:
+                # Append the new profile
+                existing_data.append(new_profile)
+                existing_usernames.add(username)
+                print(f"Added new profile for {username}")
+        
+        # Save the updated data
         with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(data_array, f, indent=2, ensure_ascii=False)
+            json.dump(existing_data, f, indent=2, ensure_ascii=False)
         print(f"Profile data array saved to {filename}")
     except Exception as e:
         print(f"Error saving profile data to {filename}: {e}")
+        traceback.print_exc()
+
+def is_profile_data_outdated(username, filename, max_age_days=365):
+    """Check if profile data is older than specified number of days or doesn't exist.
+    Returns True if data should be reparsed, False otherwise."""
+    if not os.path.exists(filename) or os.path.getsize(filename) == 0:
+        print(f"No existing data file found for {username}")
+        return True
+    
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                for profile in data:
+                    if profile.get('username') == username:
+                        scrape_time_str = profile.get('scrape_time')
+                        if not scrape_time_str:
+                            print(f"No scrape time found for {username}")
+                            return True
+                        
+                        try:
+                            scrape_time = datetime.strptime(scrape_time_str, "%Y-%m-%d %H:%M:%S")
+                            current_time = datetime.now()
+                            age = current_time - scrape_time
+                            
+                            if age > timedelta(days=max_age_days):
+                                print(f"Data for {username} is {age.days} days old (older than {max_age_days} days)")
+                                return True
+                            else:
+                                print(f"Data for {username} is {age.days} days old (within {max_age_days} days)")
+                                return False
+                        except ValueError as e:
+                            print(f"Error parsing date for {username}: {e}")
+                            return True
+                
+                # If we get here, the username wasn't found in the data
+                print(f"No data found for {username}")
+                return True
+            except json.JSONDecodeError:
+                print(f"Error parsing JSON file: {filename}")
+                return True
+    except Exception as e:
+        print(f"Error reading data file: {e}")
+        return True
 
 # --- Main Execution ---
 if __name__ == "__main__":
     try:
+        # Parse command line arguments
+        parser = argparse.ArgumentParser(description='Instagram profile scraper')
+        parser.add_argument('--test', action='store_true', help='Run in test mode (skip actual scraping)')
+        parser.add_argument('--force', action='store_true', help='Force scraping even if data is recent')
+        parser.add_argument('--max-age', type=int, default=365, help='Maximum age of data in days before rescraping (default: 365)')
+        args = parser.parse_args()
+        
         # Read usernames from file
         usernames = read_usernames_from_file(USERNAMES_FILE)
         if not usernames:
             print("No usernames found. Exiting.")
             sys.exit(1)
             
+        print(f"Read {len(usernames)} usernames from {USERNAMES_FILE}")
+        
         print("Setting up Chrome options...")
         chrome_options = Options()
         # Uncomment these as needed for troubleshooting
@@ -1131,6 +1218,16 @@ if __name__ == "__main__":
         for username in usernames:
             print(f"\n{'='*50}\nProcessing profile: {username}\n{'='*50}")
             
+            # Check if we need to scrape this profile
+            if not args.force and not is_profile_data_outdated(username, PROFILE_DATA_FILE, args.max_age):
+                print(f"Data for {username} is recent. Skipping.")
+                continue
+            
+            # In test mode, skip actual scraping
+            if args.test:
+                print(f"TEST MODE: Would scrape profile for {username}")
+                continue
+            
             # Scrape profile data
             profile_data = scrape_profile_data(driver, username)
             
@@ -1140,8 +1237,12 @@ if __name__ == "__main__":
             # Small delay between profiles to avoid rate limiting
             time.sleep(3)
         
-        # Save all profile data to a single JSON file
-        save_profile_data_array(all_profile_data, PROFILE_DATA_FILE)
+        # Only save if we actually scraped data
+        if all_profile_data:
+            # Save all profile data to a single JSON file (appending to existing data)
+            save_profile_data_array(all_profile_data, PROFILE_DATA_FILE)
+        else:
+            print("No new data to save.")
 
         # Close the browser
         print("Closing browser.")
