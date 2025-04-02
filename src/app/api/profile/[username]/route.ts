@@ -27,7 +27,7 @@ interface ReelData {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { username: string } }
+  context: { params: { username: string } }
 ) {
   try {
     // Get authenticated user
@@ -37,7 +37,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { username } = params;
+    const { username } = context.params;
 
     if (!username) {
       return NextResponse.json(
