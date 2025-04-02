@@ -48,13 +48,12 @@ interface ConvertedProfileData {
 // Converted reel format for database
 interface ConvertedReelData {
   reelId: string;
-  shortcode: string;
-  caption?: string | null;
-  mediaUrl?: string | null;
-  viewsCount?: number | null;
-  likesCount?: number | null;
-  commentsCount?: number | null;
-  timestamp?: Date | null;
+  url?: string | null;
+  thumbnail?: string | null;
+  views?: number | null;
+  likes?: number | null;
+  comments?: number | null;
+  postedDate?: Date | null;
 }
 
 export class InstagramScraper {
@@ -84,13 +83,12 @@ export class InstagramScraper {
     // Convert reels data
     const reels: ConvertedReelData[] = (data.reels || []).map((reel) => ({
       reelId: reel.id,
-      shortcode: reel.id, // Use id as shortcode since it's required
-      caption: null, // New format doesn't have captions
-      mediaUrl: reel.url, // Use URL as media URL
-      viewsCount: reel.views,
-      likesCount: reel.likes,
-      commentsCount: reel.comments,
-      timestamp: null, // New format doesn't have timestamps
+      url: reel.url,
+      thumbnail: reel.thumbnail,
+      views: reel.views,
+      likes: reel.likes,
+      comments: reel.comments,
+      postedDate: reel.posted_date ? new Date(reel.posted_date) : null,
     }));
 
     return { profile, reels };
@@ -246,13 +244,12 @@ export class InstagramScraper {
           await prisma.reel.create({
             data: {
               reelId: reelData.reelId,
-              shortcode: reelData.shortcode,
-              caption: reelData.caption,
-              mediaUrl: reelData.mediaUrl,
-              viewsCount: reelData.viewsCount,
-              likesCount: reelData.likesCount,
-              commentsCount: reelData.commentsCount,
-              timestamp: reelData.timestamp,
+              url: reelData.url,
+              thumbnail: reelData.thumbnail,
+              views: reelData.views,
+              likes: reelData.likes,
+              comments: reelData.comments,
+              postedDate: reelData.postedDate,
               instagramProfileId: profile.id,
             },
           });

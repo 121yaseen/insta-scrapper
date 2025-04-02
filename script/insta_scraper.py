@@ -946,12 +946,6 @@ def scrape_profile_data(driver, target_username):
         except (NoSuchElementException, TimeoutException) as e:
             print(f"Error getting profile stats: {e}")
             
-            # Special handling for abhinavsnayak
-            if target_username == "abhinavsnayak":
-                print("Using hardcoded stats for abhinavsnayak from screenshot")
-                profile_data["posts_count"] = 100
-                profile_data["followers_count"] = 19600  # 19.6K
-                profile_data["following_count"] = 499
 
         # Try to get recent posts if account is not private
         if not profile_data.get("is_private", True):
@@ -1084,7 +1078,7 @@ def save_profile_data_array(data_array, filename):
         print(f"Error saving profile data to {filename}: {e}")
         traceback.print_exc()
 
-def is_profile_data_outdated(username, filename, max_age_days=365):
+def is_profile_data_outdated(username, filename, max_age_days=0):
     """Check if profile data is older than specified number of days or doesn't exist.
     Returns True if data should be reparsed, False otherwise."""
     if not os.path.exists(filename) or os.path.getsize(filename) == 0:
