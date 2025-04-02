@@ -52,7 +52,11 @@ export async function GET() {
         username: req.username,
         status:
           req.queuedRequest?.scrapeRequest?.status ||
-          (req.queuedRequest ? "queued" : "completed"),
+          (req.queuedRequest
+            ? req.queuedRequest.status
+            : req.instagramProfile
+            ? "completed"
+            : "pending"),
         createdAt: req.createdAt,
         updatedAt: req.queuedRequest?.updatedAt || req.createdAt,
         error: req.queuedRequest?.scrapeRequest?.error,
