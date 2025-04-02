@@ -35,11 +35,14 @@ model InstagramProfile {
   postsCount     Int?
   isVerified     Boolean         @default(false)
   isPrivate      Boolean         @default(false)
+  scrapeTime     DateTime        @default(now())
+  externalUrl    String?
   lastScraped    DateTime        @default(now())
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   posts          Post[]
   reels          Reel[]
+  reelsCount     Int?
   scrapeRequests ScrapeRequest[]
   UserRequest    UserRequest[]
 }
@@ -65,13 +68,12 @@ model Post {
 model Reel {
   id                 String           @id @default(cuid())
   reelId             String           @unique
-  shortcode          String           @unique
-  caption            String?
-  mediaUrl           String?
-  viewsCount         Int?
-  likesCount         Int?
-  commentsCount      Int?
-  timestamp          DateTime?
+  url                String?
+  thumbnail          String?
+  views              Int?
+  likes              Int?
+  comments           Int?
+  postedDate         DateTime?
   instagramProfileId String
   instagramProfile   InstagramProfile @relation(fields: [instagramProfileId], references: [id], onDelete: Cascade)
   createdAt          DateTime         @default(now())

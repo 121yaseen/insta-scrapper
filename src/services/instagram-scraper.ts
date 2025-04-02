@@ -1,7 +1,36 @@
-import axios from "axios";
 import { prisma } from "@/lib/prisma";
 
+// New format from the JSON file
+interface ReelData {
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
+  posted_date: string | null;
+}
+
+// New format from JSON
 interface InstagramData {
+  username: string;
+  scrape_time?: string;
+  full_name?: string;
+  is_verified?: boolean;
+  bio?: string;
+  external_url?: string | null;
+  profile_pic_url?: string;
+  is_private?: boolean;
+  posts_count?: number;
+  followers_count?: number;
+  following_count?: number;
+  recent_posts?: unknown[];
+  reels_count?: number;
+  reels?: ReelData[];
+}
+
+// Converted format for database
+interface ConvertedProfileData {
   username: string;
   fullName?: string;
   bio?: string;
@@ -11,11 +40,62 @@ interface InstagramData {
   postsCount?: number;
   isVerified?: boolean;
   isPrivate?: boolean;
-  posts?: any[];
-  reels?: any[];
+  scrapeTime?: Date;
+  externalUrl?: string | null;
+  reelsCount?: number;
+}
+
+// Converted reel format for database
+interface ConvertedReelData {
+  reelId: string;
+  shortcode: string;
+  caption?: string | null;
+  mediaUrl?: string | null;
+  viewsCount?: number | null;
+  likesCount?: number | null;
+  commentsCount?: number | null;
+  timestamp?: Date | null;
 }
 
 export class InstagramScraper {
+  /**
+   * Convert new format to database format
+   */
+  private static convertToDbFormat(data: InstagramData): {
+    profile: ConvertedProfileData;
+    reels: ConvertedReelData[];
+  } {
+    // Convert profile data
+    const profile: ConvertedProfileData = {
+      username: data.username,
+      fullName: data.full_name,
+      bio: data.bio || "",
+      profilePicUrl: data.profile_pic_url,
+      followersCount: data.followers_count,
+      followingCount: data.following_count,
+      postsCount: data.posts_count,
+      isVerified: data.is_verified,
+      isPrivate: data.is_private,
+      scrapeTime: data.scrape_time ? new Date(data.scrape_time) : new Date(),
+      externalUrl: data.external_url,
+      reelsCount: data.reels_count,
+    };
+
+    // Convert reels data
+    const reels: ConvertedReelData[] = (data.reels || []).map((reel) => ({
+      reelId: reel.id,
+      shortcode: reel.id, // Use id as shortcode since it's required
+      caption: null, // New format doesn't have captions
+      mediaUrl: reel.url, // Use URL as media URL
+      viewsCount: reel.views,
+      likesCount: reel.likes,
+      commentsCount: reel.comments,
+      timestamp: null, // New format doesn't have timestamps
+    }));
+
+    return { profile, reels };
+  }
+
   /**
    * Scrape Instagram profile and save to database
    */
@@ -28,43 +108,32 @@ export class InstagramScraper {
       // Simulate delay for API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // For demo purposes, we'll generate mock data
-      // In a real application, you would implement actual scraping logic
+      // For demo purposes, we'll generate mock data in the new format
       const mockData: InstagramData = {
         username,
-        fullName: `${
+        scrape_time: new Date().toISOString(),
+        full_name: `${
           username.charAt(0).toUpperCase() + username.slice(1)
         } User`,
+        is_verified: Math.random() > 0.8,
         bio: `This is a mock bio for ${username}`,
-        profilePicUrl: `https://ui-avatars.com/api/?name=${username}&background=random`,
-        followersCount: Math.floor(Math.random() * 10000),
-        followingCount: Math.floor(Math.random() * 1000),
-        postsCount: Math.floor(Math.random() * 100),
-        isVerified: Math.random() > 0.8,
-        isPrivate: Math.random() > 0.7,
-        posts: Array.from({ length: 12 }, (_, i) => ({
-          postId: `post_${username}_${i}`,
-          shortcode: `shortcode_${username}_${i}`,
-          caption: `Post caption ${i} for ${username}`,
-          mediaType: Math.random() > 0.3 ? "image" : "video",
-          mediaUrl: `https://picsum.photos/500/500?random=${i}`,
-          likesCount: Math.floor(Math.random() * 1000),
-          commentsCount: Math.floor(Math.random() * 100),
-          timestamp: new Date(
-            Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
-          ),
-        })),
-        reels: Array.from({ length: 6 }, (_, i) => ({
-          reelId: `reel_${username}_${i}`,
-          shortcode: `shortcode_reel_${username}_${i}`,
-          caption: `Reel caption ${i} for ${username}`,
-          mediaUrl: `https://picsum.photos/500/800?random=${i + 100}`,
-          viewsCount: Math.floor(Math.random() * 5000),
-          likesCount: Math.floor(Math.random() * 2000),
-          commentsCount: Math.floor(Math.random() * 200),
-          timestamp: new Date(
-            Date.now() - Math.random() * 15 * 24 * 60 * 60 * 1000
-          ),
+        external_url:
+          Math.random() > 0.5 ? `https://www.example.com/${username}` : null,
+        profile_pic_url: `https://ui-avatars.com/api/?name=${username}&background=random`,
+        is_private: Math.random() > 0.7,
+        posts_count: Math.floor(Math.random() * 100),
+        followers_count: Math.floor(Math.random() * 10000),
+        following_count: Math.floor(Math.random() * 1000),
+        recent_posts: [],
+        reels_count: 10,
+        reels: Array.from({ length: 10 }, (_, i) => ({
+          id: `reel_${i}`,
+          url: `https://www.instagram.com/${username}/reel/reel_${i}/`,
+          thumbnail: null,
+          views: Math.floor(Math.random() * 5000),
+          likes: Math.floor(Math.random() * 2000),
+          comments: Math.floor(Math.random() * 200),
+          posted_date: null,
         })),
       };
 
@@ -104,6 +173,10 @@ export class InstagramScraper {
         );
       }
 
+      // Convert to database format
+      const { profile: convertedProfile, reels: convertedReels } =
+        this.convertToDbFormat(instagramData);
+
       // Check if profile already exists
       let profile = await prisma.instagramProfile.findUnique({
         where: { username: request.username },
@@ -114,110 +187,75 @@ export class InstagramScraper {
         profile = await prisma.instagramProfile.update({
           where: { id: profile.id },
           data: {
-            fullName: instagramData.fullName,
-            bio: instagramData.bio,
-            profilePicUrl: instagramData.profilePicUrl,
-            followersCount: instagramData.followersCount,
-            followingCount: instagramData.followingCount,
-            postsCount: instagramData.postsCount,
-            isVerified: instagramData.isVerified,
-            isPrivate: instagramData.isPrivate,
+            fullName: convertedProfile.fullName,
+            bio: convertedProfile.bio,
+            profilePicUrl: convertedProfile.profilePicUrl,
+            followersCount: convertedProfile.followersCount,
+            followingCount: convertedProfile.followingCount,
+            postsCount: convertedProfile.postsCount,
+            isVerified: convertedProfile.isVerified,
+            isPrivate: convertedProfile.isPrivate,
             lastScraped: new Date(),
+            // Add these fields only if they exist in the schema
+            ...(convertedProfile.externalUrl !== undefined && {
+              externalUrl: convertedProfile.externalUrl,
+            }),
+            ...(convertedProfile.reelsCount !== undefined && {
+              reelsCount: convertedProfile.reelsCount,
+            }),
+            ...(convertedProfile.scrapeTime !== undefined && {
+              scrapeTime: convertedProfile.scrapeTime,
+            }),
           },
         });
       } else {
         profile = await prisma.instagramProfile.create({
           data: {
-            username: instagramData.username,
-            fullName: instagramData.fullName,
-            bio: instagramData.bio,
-            profilePicUrl: instagramData.profilePicUrl,
-            followersCount: instagramData.followersCount,
-            followingCount: instagramData.followingCount,
-            postsCount: instagramData.postsCount,
-            isVerified: instagramData.isVerified,
-            isPrivate: instagramData.isPrivate,
+            username: convertedProfile.username,
+            fullName: convertedProfile.fullName,
+            bio: convertedProfile.bio,
+            profilePicUrl: convertedProfile.profilePicUrl,
+            followersCount: convertedProfile.followersCount,
+            followingCount: convertedProfile.followingCount,
+            postsCount: convertedProfile.postsCount,
+            isVerified: convertedProfile.isVerified,
+            isPrivate: convertedProfile.isPrivate,
+            // Add these fields only if they exist in the schema
+            ...(convertedProfile.externalUrl !== undefined && {
+              externalUrl: convertedProfile.externalUrl,
+            }),
+            ...(convertedProfile.reelsCount !== undefined && {
+              reelsCount: convertedProfile.reelsCount,
+            }),
+            ...(convertedProfile.scrapeTime !== undefined && {
+              scrapeTime: convertedProfile.scrapeTime,
+            }),
           },
         });
       }
 
-      // Process posts
-      if (instagramData.posts && instagramData.posts.length > 0) {
-        for (const postData of instagramData.posts) {
-          // Check if post exists
-          const existingPost = await prisma.post.findUnique({
-            where: { postId: postData.postId },
-          });
-
-          if (existingPost) {
-            // Update existing post
-            await prisma.post.update({
-              where: { id: existingPost.id },
-              data: {
-                caption: postData.caption,
-                mediaType: postData.mediaType,
-                mediaUrl: postData.mediaUrl,
-                likesCount: postData.likesCount,
-                commentsCount: postData.commentsCount,
-                timestamp: postData.timestamp,
-              },
-            });
-          } else {
-            // Create new post
-            await prisma.post.create({
-              data: {
-                postId: postData.postId,
-                shortcode: postData.shortcode,
-                caption: postData.caption,
-                mediaType: postData.mediaType,
-                mediaUrl: postData.mediaUrl,
-                likesCount: postData.likesCount,
-                commentsCount: postData.commentsCount,
-                timestamp: postData.timestamp,
-                instagramProfileId: profile.id,
-              },
-            });
-          }
-        }
-      }
-
       // Process reels
-      if (instagramData.reels && instagramData.reels.length > 0) {
-        for (const reelData of instagramData.reels) {
-          // Check if reel exists
-          const existingReel = await prisma.reel.findUnique({
-            where: { reelId: reelData.reelId },
-          });
+      if (convertedReels.length > 0) {
+        // Delete existing reels first to avoid duplicates
+        await prisma.reel.deleteMany({
+          where: { instagramProfileId: profile.id },
+        });
 
-          if (existingReel) {
-            // Update existing reel
-            await prisma.reel.update({
-              where: { id: existingReel.id },
-              data: {
-                caption: reelData.caption,
-                mediaUrl: reelData.mediaUrl,
-                viewsCount: reelData.viewsCount,
-                likesCount: reelData.likesCount,
-                commentsCount: reelData.commentsCount,
-                timestamp: reelData.timestamp,
-              },
-            });
-          } else {
-            // Create new reel
-            await prisma.reel.create({
-              data: {
-                reelId: reelData.reelId,
-                shortcode: reelData.shortcode,
-                caption: reelData.caption,
-                mediaUrl: reelData.mediaUrl,
-                viewsCount: reelData.viewsCount,
-                likesCount: reelData.likesCount,
-                commentsCount: reelData.commentsCount,
-                timestamp: reelData.timestamp,
-                instagramProfileId: profile.id,
-              },
-            });
-          }
+        // Create new reels
+        for (const reelData of convertedReels) {
+          await prisma.reel.create({
+            data: {
+              reelId: reelData.reelId,
+              shortcode: reelData.shortcode,
+              caption: reelData.caption,
+              mediaUrl: reelData.mediaUrl,
+              viewsCount: reelData.viewsCount,
+              likesCount: reelData.likesCount,
+              commentsCount: reelData.commentsCount,
+              timestamp: reelData.timestamp,
+              instagramProfileId: profile.id,
+            },
+          });
         }
       }
 

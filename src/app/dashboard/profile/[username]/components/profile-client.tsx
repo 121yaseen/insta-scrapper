@@ -37,10 +37,13 @@ interface Post {
 }
 
 interface Reel {
-  mediaUrl: string;
-  viewsCount: number;
-  likesCount: number;
-  timestamp: string;
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
+  postedDate: string | null;
 }
 
 interface ProfileData {
@@ -49,6 +52,7 @@ interface ProfileData {
   fullName?: string;
   bio?: string;
   profilePicUrl?: string;
+  externalUrl?: string | null;
   followersCount?: number;
   followingCount?: number;
   postsCount?: number;
@@ -56,6 +60,8 @@ interface ProfileData {
   isPrivate?: boolean;
   posts?: Post[];
   reels?: Reel[];
+  reelsCount?: number;
+  scrapeTime?: string;
   lastScraped?: string;
 }
 
@@ -263,6 +269,19 @@ export default function ProfileClient({ username }: { username: string }) {
                       {profile.bio}
                     </p>
 
+                    {profile.externalUrl && (
+                      <p className="text-gray-500 mb-4">
+                        <a
+                          href={profile.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:text-purple-800"
+                        >
+                          {profile.externalUrl}
+                        </a>
+                      </p>
+                    )}
+
                     <div className="flex flex-wrap justify-center md:justify-start gap-8 mb-6">
                       <div className="text-center md:text-left">
                         <div className="font-bold text-2xl text-gray-900">
@@ -414,6 +433,15 @@ export default function ProfileClient({ username }: { username: string }) {
                       </div>
                     </div>
                   </div>
+
+                  {profile.scrapeTime && (
+                    <div className="mt-6 text-sm text-gray-500">
+                      <p>
+                        Last scraped:{" "}
+                        {new Date(profile.scrapeTime).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
                 </>
               )}
 
@@ -478,75 +506,103 @@ export default function ProfileClient({ username }: { username: string }) {
               )}
 
               {activeTab === "reels" && (
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Recent Reels
-                    </h3>
-                    {profile.reels && profile.reels.length > 0 && (
-                      <span className="text-sm text-gray-500">
-                        Showing {profile.reels.length} reels
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {profile.reels && profile.reels.length > 0 ? (
-                      profile.reels.map((reel, index) => (
-                        <div
-                          key={index}
-                          className="rounded-lg overflow-hidden shadow-sm border border-gray-200 group hover:shadow-md transition-shadow"
-                        >
-                          <div className="relative aspect-[9/16]">
-                            <Image
-                              src={reel.mediaUrl}
-                              alt={`Reel ${index + 1}`}
-                              fill
-                              className="object-cover"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="p-3 bg-black/30 backdrop-blur-sm rounded-full group-hover:bg-purple-600/60 transition-colors duration-300">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="white"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <polygon points="5 3 19 12 5 21 5 3" />
-                                </svg>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="p-3 bg-white">
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center justify-between text-sm text-gray-600">
-                                <div className="flex items-center gap-3">
-                                  <span className="flex items-center">
-                                    👁️ {reel.viewsCount}
-                                  </span>
-                                  <span className="flex items-center">
-                                    ❤️ {reel.likesCount}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="text-xs text-gray-500 truncate">
-                                {new Date(reel.timestamp).toLocaleDateString()}
-                              </div>
-                            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                  {profile.reels && profile.reels.length > 0 ? (
+                    profile.reels.map((reel) => (
+                      <div
+                        key={reel.id}
+                        className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                      >
+                        <div className="aspect-[9/16] relative bg-gray-100">
+                          {/* If thumbnail is not available, use a placeholder */}
+                          <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                            <Instagram className="w-12 h-12" />
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <div className="col-span-full text-center py-12 text-gray-500">
-                        No reels available
+                        <div className="p-4">
+                          <a
+                            href={reel.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-600 hover:text-purple-800 text-sm font-medium mb-2 flex items-center"
+                          >
+                            <Instagram className="inline-block mr-1 w-4 h-4" />
+                            View on Instagram
+                          </a>
+
+                          <div className="flex items-center justify-between mt-3 text-gray-500 text-sm">
+                            <div className="flex items-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 mr-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
+                              </svg>
+                              {reel.views ? reel.views.toLocaleString() : "N/A"}
+                            </div>
+
+                            {reel.likes && (
+                              <div className="flex items-center">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 mr-1"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                  />
+                                </svg>
+                                {reel.likes.toLocaleString()}
+                              </div>
+                            )}
+
+                            {reel.comments && (
+                              <div className="flex items-center">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 mr-1"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                  />
+                                </svg>
+                                {reel.comments.toLocaleString()}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12 text-gray-500">
+                      No reels found for this profile.
+                    </div>
+                  )}
                 </div>
               )}
             </>

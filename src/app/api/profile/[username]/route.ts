@@ -3,28 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { InstagramScraper } from "@/services/instagram-scraper";
 
-interface PostData {
-  postId: string;
-  shortcode: string;
-  caption?: string;
-  mediaType?: string;
-  mediaUrl?: string;
-  likesCount?: number;
-  commentsCount?: number;
-  timestamp?: Date;
-}
-
-interface ReelData {
-  reelId: string;
-  shortcode: string;
-  caption?: string;
-  mediaUrl?: string;
-  viewsCount?: number;
-  likesCount?: number;
-  commentsCount?: number;
-  timestamp?: Date;
-}
-
 export async function GET(
   req: NextRequest,
   context: { params: { username: string } }
@@ -58,9 +36,9 @@ export async function GET(
         },
         reels: {
           orderBy: {
-            timestamp: "desc",
+            createdAt: "desc",
           },
-          take: 6,
+          take: 10,
         },
       },
     });
@@ -86,11 +64,8 @@ export async function GET(
         );
       }
 
-      // Profile doesn't exist and no pending request, create a mock profile for demo
-      // In a real app, you would create a scrape request here
-      const mockData = await InstagramScraper.scrapeProfile(username);
-
-      if (mockData) {
+      // Profile doesn't exist and no pending request, simulate scraping
+      try {
         // Create a user if it doesn't exist
         let dbUser = await prisma.user.findFirst({
           where: {
@@ -108,52 +83,21 @@ export async function GET(
           });
         }
 
-        // Create a profile
-        profile = await prisma.instagramProfile.create({
+        // Create a scrape request
+        const scrapeRequest = await prisma.scrapeRequest.create({
           data: {
-            username: mockData.username,
-            fullName: mockData.fullName,
-            bio: mockData.bio,
-            profilePicUrl: mockData.profilePicUrl,
-            followersCount: mockData.followersCount,
-            followingCount: mockData.followingCount,
-            postsCount: mockData.postsCount,
-            isVerified: mockData.isVerified,
-            isPrivate: mockData.isPrivate,
-            posts: {
-              create:
-                mockData.posts?.map((post: PostData) => ({
-                  postId: post.postId,
-                  shortcode: post.shortcode,
-                  caption: post.caption,
-                  mediaType: post.mediaType,
-                  mediaUrl: post.mediaUrl,
-                  likesCount: post.likesCount,
-                  commentsCount: post.commentsCount,
-                  timestamp: post.timestamp,
-                })) || [],
-            },
-            reels: {
-              create:
-                mockData.reels?.map((reel: ReelData) => ({
-                  reelId: reel.reelId,
-                  shortcode: reel.shortcode,
-                  caption: reel.caption,
-                  mediaUrl: reel.mediaUrl,
-                  viewsCount: reel.viewsCount,
-                  likesCount: reel.likesCount,
-                  commentsCount: reel.commentsCount,
-                  timestamp: reel.timestamp,
-                })) || [],
-            },
-            scrapeRequests: {
-              create: {
-                username: mockData.username,
-                status: "completed",
-                userId: dbUser.id,
-              },
-            },
+            username,
+            status: "processing",
+            userId: dbUser.id,
           },
+        });
+
+        // Process the request (normally this would be done by a background job)
+        await InstagramScraper.processScrapeRequest(scrapeRequest.id);
+
+        // Fetch the newly created profile
+        profile = await prisma.instagramProfile.findUnique({
+          where: { username },
           include: {
             posts: {
               orderBy: {
@@ -163,16 +107,21 @@ export async function GET(
             },
             reels: {
               orderBy: {
-                timestamp: "desc",
+                createdAt: "desc",
               },
-              take: 6,
+              take: 10,
             },
           },
         });
-      } else {
+
+        if (!profile) {
+          throw new Error("Failed to create profile");
+        }
+      } catch (error) {
+        console.error("Error creating profile:", error);
         return NextResponse.json(
           { error: "Failed to retrieve profile data" },
-          { status: 404 }
+          { status: 500 }
         );
       }
     }
