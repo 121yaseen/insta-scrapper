@@ -10,7 +10,7 @@ export default function SignInPage() {
             Welcome back to InstaScrapr
           </p>
         </div>
-        <SignIn />
+        <SignIn redirectUrl="/dashboard" />
       </div>
     </div>
   );

@@ -1,9 +1,34 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, Check, Instagram, Search } from "lucide-react";
-import { auth } from "@clerk/nextjs/server";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 
 export default function Home() {
-  const { userId } = auth();
+  const { userId, isLoaded } = useAuth();
+  const router = useRouter();
+  const [instagramHandle, setInstagramHandle] = useState("");
+
+  // Redirect to dashboard if user is logged in
+  useEffect(() => {
+    if (isLoaded && userId) {
+      router.push("/dashboard");
+    }
+  }, [isLoaded, userId, router]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (instagramHandle.trim()) {
+      // Store the Instagram handle in localStorage
+      localStorage.setItem("instagramHandle", instagramHandle.trim());
+
+      // Redirect to sign-in page
+      router.push("/sign-in");
+    }
+  };
 
   return (
     <div className="relative overflow-hidden bg-white">
@@ -98,8 +123,11 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Search bar mockup */}
-            <div className="mt-16 max-w-2xl mx-auto bg-white p-4 rounded-xl shadow-lg">
+            {/* Search bar form */}
+            <form
+              onSubmit={handleSearch}
+              className="mt-16 max-w-2xl mx-auto bg-white p-4 rounded-xl shadow-lg"
+            >
               <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
                 <div className="px-3 py-2 bg-gray-50">
                   <Instagram className="w-5 h-5 text-gray-500" />
@@ -108,9 +136,13 @@ export default function Home() {
                   type="text"
                   placeholder="Enter Instagram handle (e.g., @username)"
                   className="flex-1 px-4 py-3 outline-none text-gray-700"
-                  disabled
+                  value={instagramHandle}
+                  onChange={(e) => setInstagramHandle(e.target.value)}
                 />
-                <button className="px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium flex items-center">
+                <button
+                  type="submit"
+                  className="px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium flex items-center"
+                >
                   <Search className="w-4 h-4 mr-2" />
                   Search
                 </button>
@@ -118,7 +150,7 @@ export default function Home() {
               <p className="text-xs text-gray-500 mt-2">
                 Try our tool with your favorite Instagram profiles
               </p>
-            </div>
+            </form>
           </div>
         </div>
       </div>

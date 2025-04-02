@@ -10,7 +10,7 @@ export default function SignUpPage() {
             Create your account to access InstaScrapr
           </p>
         </div>
-        <SignUp />
+        <SignUp redirectUrl="/dashboard" />
       </div>
     </div>
   );

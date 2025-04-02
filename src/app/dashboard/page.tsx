@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import {
@@ -15,6 +15,16 @@ export default function Dashboard() {
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  // Load Instagram handle from localStorage when component mounts
+  useEffect(() => {
+    const savedHandle = localStorage.getItem("instagramHandle");
+    if (savedHandle) {
+      setUsername(savedHandle);
+      // Clear from localStorage to avoid persisting indefinitely
+      localStorage.removeItem("instagramHandle");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
