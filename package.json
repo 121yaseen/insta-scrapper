@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "npx prisma generate && npm install --legacy-peer-deps && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.0",
@@ -26,7 +27,9 @@
     "clsx": "^2.1.0",
     "tailwind-merge": "^2.2.1",
     "zod": "^3.22.4",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38"
   },
   "devDependencies": {
     "@types/node": "^20.11.25",
