@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
     // Find the scrape request
     const scrapeRequest = await prisma.scrapeRequest.findUnique({
       where: { id: requestId },
+      include: {
+        queuedRequest: true,
+      },
     });
 
     if (!scrapeRequest) {
@@ -54,6 +57,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Create a new user request entry
+    const userRequest = await prisma.userRequest.create({
+      data: {
+        username: scrapeRequest.username,
+        userId: dbUser.id,
+        instagramProfileId: scrapeRequest.instagramProfileId,
+      },
+    });
+
     // Update the request status back to pending
     const updatedRequest = await prisma.scrapeRequest.update({
       where: { id: requestId },
@@ -62,6 +74,31 @@ export async function POST(req: NextRequest) {
         error: null,
       },
     });
+
+    // Create or update the QueuedRequest
+    // If there's already an associated QueuedRequest, update it
+    if (scrapeRequest.queuedRequest) {
+      await prisma.queuedRequest.update({
+        where: {
+          id: scrapeRequest.queuedRequest.id,
+        },
+        data: {
+          status: "pending",
+          lastQueued: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create a new QueuedRequest
+      await prisma.queuedRequest.create({
+        data: {
+          userRequestId: userRequest.id,
+          scrapeRequestId: updatedRequest.id,
+          username: scrapeRequest.username,
+          status: "pending",
+        },
+      });
+    }
 
     return NextResponse.json({
       message: "Scrape request has been queued for retry",

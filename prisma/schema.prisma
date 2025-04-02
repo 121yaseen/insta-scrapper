@@ -21,6 +21,7 @@ model User {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   scrapeRequests ScrapeRequest[]
+  userRequests   UserRequest[]
 }
 
 model InstagramProfile {
@@ -40,6 +41,7 @@ model InstagramProfile {
   posts          Post[]
   reels          Reel[]
   scrapeRequests ScrapeRequest[]
+  UserRequest    UserRequest[]
 }
 
 model Post {
@@ -90,7 +92,42 @@ model ScrapeRequest {
   error              String?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+  queuedRequest      QueuedRequest?
 
   @@index([userId])
   @@index([instagramProfileId])
+}
+
+// User Requests Table - Stores all incoming requests
+model UserRequest {
+  id                 String            @id @default(cuid())
+  username           String
+  userId             String
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instagramProfileId String?
+  instagramProfile   InstagramProfile? @relation(fields: [instagramProfileId], references: [id])
+  createdAt          DateTime          @default(now())
+  queuedRequest      QueuedRequest?
+
+  @@index([userId])
+  @@index([username])
+  @@index([instagramProfileId])
+}
+
+// Actual Queue Table - Stores only requests eligible for processing
+model QueuedRequest {
+  id              String         @id @default(cuid())
+  userRequestId   String         @unique
+  userRequest     UserRequest    @relation(fields: [userRequestId], references: [id], onDelete: Cascade)
+  scrapeRequestId String?        @unique
+  scrapeRequest   ScrapeRequest? @relation(fields: [scrapeRequestId], references: [id])
+  username        String
+  status          String         @default("pending") // pending, processing, completed, failed
+  lastQueued      DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([username])
+  @@index([status])
+  @@index([lastQueued])
 }

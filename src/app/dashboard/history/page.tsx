@@ -20,6 +20,8 @@ interface ScrapeRequest {
   updatedAt: string;
   error?: string;
   profilePicUrl?: string;
+  lastQueued?: string;
+  queuedRequestId?: string;
 }
 
 export default function HistoryPage() {
@@ -91,7 +93,30 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Toaster position="top-center" />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+            padding: "16px",
+            borderRadius: "8px",
+          },
+          success: {
+            iconTheme: {
+              primary: "#10B981",
+              secondary: "#FFFFFF",
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: "#EF4444",
+              secondary: "#FFFFFF",
+            },
+          },
+        }}
+      />
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-4">
@@ -216,12 +241,29 @@ export default function HistoryPage() {
                                 : request.status === "pending" ||
                                   request.status === "processing"
                                 ? "bg-yellow-100 text-yellow-800"
+                                : request.status === "queued"
+                                ? "bg-blue-100 text-blue-800"
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
                             {request.status.charAt(0).toUpperCase() +
                               request.status.slice(1)}
                           </span>
+                          {request.lastQueued && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Queued:{" "}
+                              {new Date(
+                                request.lastQueued
+                              ).toLocaleDateString()}{" "}
+                              {new Date(request.lastQueued).toLocaleTimeString(
+                                [],
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </div>
+                          )}
                           {request.error && (
                             <div className="text-xs text-red-600 mt-1">
                               {request.error}
@@ -259,6 +301,8 @@ export default function HistoryPage() {
                                 "Retry"
                               )}
                             </button>
+                          ) : request.status === "queued" ? (
+                            <span className="text-blue-600">In Queue</span>
                           ) : (
                             <span className="text-gray-400">Processing</span>
                           )}

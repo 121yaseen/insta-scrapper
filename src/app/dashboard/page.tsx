@@ -53,7 +53,16 @@ export default function Dashboard() {
         throw new Error(data.message || "Failed to submit scrape request");
       }
 
-      setMessage(`Success! Request for ${username} has been submitted.`);
+      if (data.alreadyQueued) {
+        setMessage(
+          `Notice: @${username} was already queued within the last 24 hours. Your request has been saved, but processing will use the existing queue entry.`
+        );
+      } else {
+        setMessage(
+          `Success! Request for @${username} has been submitted for analysis.`
+        );
+      }
+
       setUsername("");
     } catch (error) {
       if (error instanceof Error) {

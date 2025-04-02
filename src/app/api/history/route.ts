@@ -23,8 +23,8 @@ export async function GET() {
       );
     }
 
-    // Fetch all scrape requests for the user, ordered by most recent first
-    const scrapeRequests = await prisma.scrapeRequest.findMany({
+    // Fetch all user requests for the user, joined with queue data and scrape requests
+    const userRequests = await prisma.userRequest.findMany({
       where: {
         userId: dbUser.id,
       },
@@ -32,6 +32,11 @@ export async function GET() {
         createdAt: "desc",
       },
       include: {
+        queuedRequest: {
+          include: {
+            scrapeRequest: true,
+          },
+        },
         instagramProfile: {
           select: {
             username: true,
@@ -42,14 +47,18 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      scrapeRequests: scrapeRequests.map((req) => ({
-        id: req.id,
+      scrapeRequests: userRequests.map((req) => ({
+        id: req.queuedRequest?.scrapeRequest?.id || req.id,
         username: req.username,
-        status: req.status,
+        status:
+          req.queuedRequest?.scrapeRequest?.status ||
+          (req.queuedRequest ? "queued" : "completed"),
         createdAt: req.createdAt,
-        updatedAt: req.updatedAt,
-        error: req.error,
+        updatedAt: req.queuedRequest?.updatedAt || req.createdAt,
+        error: req.queuedRequest?.scrapeRequest?.error,
         profilePicUrl: req.instagramProfile?.profilePicUrl,
+        lastQueued: req.queuedRequest?.lastQueued,
+        queuedRequestId: req.queuedRequest?.id,
       })),
     });
   } catch (error) {
