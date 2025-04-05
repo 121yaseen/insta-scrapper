@@ -270,8 +270,14 @@ export default function DiscoverPage() {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold">
-              InstaScrapr
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/images/pistah.svg"
+                alt="InstaScrapr Logo"
+                width={120}
+                height={40}
+                priority
+              />
             </Link>
             <div className="flex items-center space-x-6">
               <Link
@@ -686,6 +692,14 @@ export default function DiscoverPage() {
       {/* Footer */}
       <footer className="py-6 bg-gray-50 text-gray-600 border-t border-gray-200 mt-auto">
         <div className="container mx-auto px-4 text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/images/pistah.svg"
+              alt="InstaScrapr Logo"
+              width={100}
+              height={35}
+            />
+          </div>
           <p className="text-gray-500">
             &copy; {new Date().getFullYear()} InstaScrapr. All rights reserved.
           </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { UserButton } from "@clerk/nextjs";
 import { ReactNode } from "react";
 
@@ -19,8 +20,14 @@ export default function DashboardLayout({
       <header className="bg-white dark:bg-gray-800 shadow">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/dashboard" className="text-2xl font-bold">
-              InstaScrapr
+            <Link href="/dashboard" className="flex items-center">
+              <Image
+                src="/images/pistah.svg"
+                alt="InstaScrapr Logo"
+                width={120}
+                height={40}
+                priority
+              />
             </Link>
             <div className="flex items-center space-x-4">
               <Link

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, Check, Instagram, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -38,7 +39,15 @@ export default function Home() {
       <div className="relative pt-24 pb-32 sm:pt-32 sm:pb-40">
         <div className="container mx-auto px-4">
           <nav className="flex justify-between items-center mb-16 absolute top-0 left-0 right-0 px-4 py-6">
-            <div className="text-2xl font-bold">InstaScrapr</div>
+            <div className="flex items-center">
+              <Image
+                src="/images/pistah.svg"
+                alt="InstaScrapr Logo"
+                width={120}
+                height={40}
+                priority
+              />
+            </div>
             <div className="space-x-4">
               {userId ? (
                 <Link
@@ -160,7 +169,14 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <div className="text-xl font-bold">InstaScrapr</div>
+              <div className="flex items-center">
+                <Image
+                  src="/images/pistah.svg"
+                  alt="InstaScrapr Logo"
+                  width={100}
+                  height={35}
+                />
+              </div>
               <p className="text-gray-500">Instagram Analytics Tool</p>
             </div>
             <div className="flex space-x-6">
