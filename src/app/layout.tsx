@@ -9,8 +9,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Insta Scraper - Instagram Analytics Tool",
-  description: "Get insights from Instagram profiles with our scraping tool",
+  title: "Pistah | Find Influencers",
+  description:
+    "Discover and analyze Instagram influencers with our powerful analytics tool",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
