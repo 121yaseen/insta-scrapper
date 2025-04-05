@@ -9,6 +9,7 @@ import {
   BarChart2,
   History,
   ArrowRight,
+  Users,
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -90,6 +91,12 @@ export default function Dashboard() {
                 className="text-gray-800 hover:text-purple-600 transition-colors font-medium"
               >
                 Dashboard
+              </Link>
+              <Link
+                href="/dashboard/discover"
+                className="text-gray-600 hover:text-purple-600 transition-colors"
+              >
+                Discover
               </Link>
               <Link
                 href="/dashboard/history"
@@ -215,6 +222,32 @@ export default function Dashboard() {
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Discover Profiles Section */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100 p-8 mb-8 shadow-sm">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="mb-6 md:mb-0">
+                <h2 className="text-xl font-bold text-purple-900 mb-2 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-purple-600" />
+                  Discover Top Instagram Profiles
+                </h2>
+                <p className="text-purple-700 mb-2">
+                  Browse and analyze popular Instagram creators sorted by
+                  followers and engagement
+                </p>
+                <p className="text-sm text-purple-600">
+                  Find potential collaborators and track industry leaders
+                </p>
+              </div>
+              <Link
+                href="/dashboard/discover"
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:opacity-90 transition-opacity flex items-center font-medium shadow-sm"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Browse Profiles
+              </Link>
             </div>
           </div>
         </div>
