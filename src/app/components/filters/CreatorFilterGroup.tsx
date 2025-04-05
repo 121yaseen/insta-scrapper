@@ -81,13 +81,13 @@ export default function CreatorFilterGroup({
     <div className="px-6 py-4 space-y-6">
       {/* Last Posted */}
       <div className="space-y-2">
-        <label className="block text-gray-700 font-medium">Last Posted</label>
+        <label className="block text-black font-medium">Last Posted</label>
         <div className="relative" ref={lastPostedRef}>
           <button
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
             onClick={() => setLastPostedOpen(!lastPostedOpen)}
           >
-            <span className="text-gray-800">
+            <span className="text-black">
               {filters.last_post_timestamp
                 ? LAST_POSTED_OPTIONS.find(
                     (opt) => opt.value === filters.last_post_timestamp
@@ -102,10 +102,10 @@ export default function CreatorFilterGroup({
                 }}
                 className="mr-2"
               >
-                <X className="w-4 h-4 text-gray-500" />
+                <X className="w-4 h-4 text-black" />
               </button>
             )}
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {lastPostedOpen && (
@@ -113,7 +113,7 @@ export default function CreatorFilterGroup({
               {LAST_POSTED_OPTIONS.map((option) => (
                 <div
                   key={option.value}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => {
                     updateFilter("last_post_timestamp", option.value);
                     setLastPostedOpen(false);
@@ -156,15 +156,13 @@ export default function CreatorFilterGroup({
 
       {/* Creator Gender */}
       <div className="space-y-2">
-        <label className="block text-gray-700 font-medium">
-          Creator Gender
-        </label>
+        <label className="block text-black font-medium">Creator Gender</label>
         <div className="relative" ref={genderRef}>
           <button
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
             onClick={() => setGenderOpen(!genderOpen)}
           >
-            <span className="text-gray-800">
+            <span className="text-black">
               {filters.creator_gender
                 ? GENDER_OPTIONS.find(
                     (opt) => opt.value === filters.creator_gender
@@ -179,10 +177,10 @@ export default function CreatorFilterGroup({
                 }}
                 className="mr-2"
               >
-                <X className="w-4 h-4 text-gray-500" />
+                <X className="w-4 h-4 text-black" />
               </button>
             )}
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {genderOpen && (
@@ -190,7 +188,7 @@ export default function CreatorFilterGroup({
               {GENDER_OPTIONS.map((option) => (
                 <div
                   key={option.value}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => {
                     updateFilter("creator_gender", option.value);
                     setGenderOpen(false);
@@ -215,15 +213,13 @@ export default function CreatorFilterGroup({
 
       {/* Creator Language */}
       <div className="space-y-2">
-        <label className="block text-gray-700 font-medium">
-          Creator Language
-        </label>
+        <label className="block text-black font-medium">Creator Language</label>
         <div className="relative" ref={languageRef}>
           <button
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
             onClick={() => setLanguageOpen(!languageOpen)}
           >
-            <span className="text-gray-800">
+            <span className="text-black">
               {filters.creator_language
                 ? LANGUAGE_OPTIONS.find(
                     (opt) => opt.value === filters.creator_language
@@ -238,10 +234,10 @@ export default function CreatorFilterGroup({
                 }}
                 className="mr-2"
               >
-                <X className="w-4 h-4 text-gray-500" />
+                <X className="w-4 h-4 text-black" />
               </button>
             )}
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {languageOpen && (
@@ -249,7 +245,7 @@ export default function CreatorFilterGroup({
               {LANGUAGE_OPTIONS.map((option) => (
                 <div
                   key={option.value}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => {
                     updateFilter("creator_language", option.value);
                     setLanguageOpen(false);

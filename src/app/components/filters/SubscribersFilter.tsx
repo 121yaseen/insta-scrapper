@@ -47,7 +47,7 @@ export default function SubscribersFilter({
 
   return (
     <div className="space-y-2">
-      <label className="block text-gray-700 font-medium">Subscribers</label>
+      <label className="block text-black font-medium">Subscribers</label>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Min dropdown */}
@@ -57,7 +57,7 @@ export default function SubscribersFilter({
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
           >
             <span>{formatNumber(value.min)}</span>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {showMinDropdown && (
@@ -65,7 +65,7 @@ export default function SubscribersFilter({
               {MIN_OPTIONS.map((option) => (
                 <div
                   key={option}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => handleMinChange(option)}
                 >
                   {formatNumber(option)}
@@ -82,7 +82,7 @@ export default function SubscribersFilter({
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
           >
             <span>{formatNumber(value.max)}</span>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {showMaxDropdown && (
@@ -90,7 +90,7 @@ export default function SubscribersFilter({
               {MAX_OPTIONS.map((option) => (
                 <div
                   key={option}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => handleMaxChange(option)}
                 >
                   {formatNumber(option)}

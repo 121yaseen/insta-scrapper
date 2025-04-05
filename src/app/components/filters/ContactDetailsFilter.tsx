@@ -59,41 +59,21 @@ export default function ContactDetailsFilter({
 
   return (
     <div className="space-y-2">
-      <label className="block text-gray-700 font-medium">Contact Details</label>
+      <label className="block text-black font-medium">Contact Details</label>
 
       <div className="relative" ref={dropdownRef}>
-        {/* Selected contact types display */}
-        <div
-          className="border border-gray-200 rounded-lg p-2 min-h-[42px] flex flex-wrap gap-2 cursor-pointer"
+        <button
           onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
         >
-          {selectedTypes.length > 0 ? (
-            selectedTypes.map((type) => (
-              <div
-                key={type}
-                className="flex items-center bg-gray-100 rounded-full pl-3 pr-1 py-1"
-              >
-                <span className="text-sm">{type}</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleContactType(type);
-                  }}
-                  className="ml-1 rounded-full p-1 hover:bg-gray-200"
-                >
-                  <X className="w-3 h-3 text-gray-500" />
-                </button>
-              </div>
-            ))
-          ) : (
-            <div className="flex items-center justify-between w-full text-gray-500">
-              <span>Select contact details</span>
-              <ChevronDown className="w-4 h-4" />
-            </div>
-          )}
-        </div>
+          <span className="text-black">
+            {value.length > 0
+              ? `${value.length} selected`
+              : "Select contact details"}
+          </span>
+          <ChevronDown className="w-4 h-4 text-black" />
+        </button>
 
-        {/* Dropdown */}
         {isOpen && (
           <div className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
             {CONTACT_TYPES.map(({ value: type, label }) => (
@@ -108,7 +88,7 @@ export default function ContactDetailsFilter({
                   onChange={() => {}}
                   className="mr-2"
                 />
-                <span>{label}</span>
+                <span className="text-black">{label}</span>
               </div>
             ))}
           </div>

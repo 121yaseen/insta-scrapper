@@ -160,15 +160,13 @@ export default function AudienceFilterGroup({
 
       {/* Audience Gender */}
       <div className="space-y-2">
-        <label className="block text-gray-700 font-medium">
-          Audience Gender
-        </label>
+        <label className="block text-black font-medium">Audience Gender</label>
         <div className="relative" ref={genderRef}>
           <button
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
             onClick={() => setGenderOpen(!genderOpen)}
           >
-            <span className="text-gray-800">
+            <span className="text-black">
               {filters.audience_gender
                 ? GENDER_OPTIONS.find(
                     (opt) => opt.value === filters.audience_gender.type
@@ -183,10 +181,10 @@ export default function AudienceFilterGroup({
                 }}
                 className="mr-2"
               >
-                <X className="w-4 h-4 text-gray-500" />
+                <X className="w-4 h-4 text-black" />
               </button>
             )}
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {genderOpen && (
@@ -194,7 +192,7 @@ export default function AudienceFilterGroup({
               {GENDER_OPTIONS.map((option) => (
                 <div
                   key={option.value}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => handleGenderChange(option.value)}
                 >
                   {option.label}
@@ -207,7 +205,7 @@ export default function AudienceFilterGroup({
         {/* Gender percentage slider */}
         {filters.audience_gender && (
           <div className="mt-4">
-            <label className="block text-gray-700 mb-2">Percentage</label>
+            <label className="block text-black mb-2">Percentage</label>
             <PercentageSlider
               value={filters.audience_gender.percentage_value}
               onChange={handleGenderPercentageChange}
@@ -218,7 +216,7 @@ export default function AudienceFilterGroup({
 
       {/* Audience Locations */}
       <div className="space-y-2">
-        <label className="block text-gray-700 font-medium">
+        <label className="block text-black font-medium">
           Audience Locations
         </label>
 
@@ -235,16 +233,18 @@ export default function AudienceFilterGroup({
               >
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center">
-                    <span className="font-medium">{location.name}</span>
+                    <span className="font-medium text-black">
+                      {location.name}
+                    </span>
                     <button
                       onClick={() => handleRemoveLocation(loc.location_id)}
                       className="ml-2 p-1 hover:bg-gray-100 rounded-full"
                     >
-                      <X className="w-4 h-4 text-gray-500" />
+                      <X className="w-4 h-4 text-black" />
                     </button>
                   </div>
                 </div>
-                <label className="block text-gray-700 text-sm mb-1">
+                <label className="block text-black text-sm mb-1">
                   Percentage
                 </label>
                 <PercentageSlider
@@ -264,19 +264,19 @@ export default function AudienceFilterGroup({
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white mt-2"
             onClick={() => setLocationOpen(!locationOpen)}
           >
-            <span className="text-gray-500">Add location</span>
-            <Plus className="w-4 h-4 text-gray-500" />
+            <span className="text-black">Add location</span>
+            <Plus className="w-4 h-4 text-black" />
           </button>
 
           {locationOpen && (
-            <div className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+            <div className="text-black absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
               <div className="p-2">
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search locations..."
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
                   autoFocus
                 />
               </div>
@@ -286,14 +286,14 @@ export default function AudienceFilterGroup({
                   <div
                     key={loc.id}
                     onClick={() => handleAddLocation(loc.id)}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
                   >
                     {loc.name}
                   </div>
                 ))}
 
                 {filteredLocations.length === 0 && (
-                  <div className="px-4 py-2 text-gray-500 text-center">
+                  <div className="px-4 py-2 text-black text-center">
                     {searchTerm
                       ? "No locations found"
                       : "No more locations available"}

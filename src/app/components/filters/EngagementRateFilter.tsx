@@ -29,7 +29,7 @@ export default function EngagementRateFilter({
 
   return (
     <div className="space-y-2">
-      <label className="block text-gray-700 font-medium">Engagement Rate</label>
+      <label className="block text-black font-medium">Engagement Rate</label>
 
       <div className="space-y-2">
         <div className="flex justify-between text-sm font-medium">

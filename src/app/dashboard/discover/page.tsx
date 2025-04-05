@@ -310,16 +310,6 @@ export default function DiscoverPage() {
                 Browse and analyze popular Instagram profiles
               </p>
             </div>
-
-            {/* Quick Search Buttons */}
-            <div className="flex space-x-2 mt-4 md:mt-0">
-              <button
-                onClick={() => handleDirectUsernameSearch("clevertypeai")}
-                className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm"
-              >
-                Search CleverType
-              </button>
-            </div>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
@@ -342,7 +332,14 @@ export default function DiscoverPage() {
                       <select
                         value={searchField}
                         onChange={handleSearchFieldChange}
-                        className="border-l border-y border-gray-200 rounded-l-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-sm"
+                        className="border-l border-y border-gray-200 rounded-l-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-sm text-black appearance-none pr-8 font-medium"
+                        style={{
+                          backgroundImage:
+                            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                          backgroundRepeat: "no-repeat",
+                          backgroundPosition: "right 0.5rem center",
+                          backgroundSize: "1.2em 1.2em",
+                        }}
                       >
                         <option value="keywords">Keywords</option>
                         <option value="username">Username</option>
@@ -353,7 +350,7 @@ export default function DiscoverPage() {
                         value={searchTerm}
                         onChange={handleSearchTermChange}
                         placeholder="Search creators..."
-                        className="border-y border-r border-gray-200 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 w-64"
+                        className="border-y border-r border-gray-200 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 w-64 text-black"
                       />
                       <button
                         type="submit"
@@ -377,7 +374,7 @@ export default function DiscoverPage() {
                       onChange={handleVerifiedChange}
                       className="mr-2"
                     />
-                    <label htmlFor="verified" className="text-gray-700">
+                    <label htmlFor="verified" className="text-black">
                       Verified
                     </label>
                   </div>
@@ -415,7 +412,7 @@ export default function DiscoverPage() {
                             Follower Size
                           </li>
                           <li
-                            className={`py-3.5 px-5 bg-green-500 text-white cursor-pointer text-[15px]`}
+                            className={`py-3.5 px-5 hover:bg-pink-50 cursor-pointer text-[15px] text-gray-800 transition-colors`}
                             onClick={() => {
                               handleSortChange("AVERAGE_LIKES", "DESCENDING");
                             }}
@@ -604,9 +601,9 @@ export default function DiscoverPage() {
                         {/* Average Likes */}
                         <div className="flex items-center mb-6">
                           <Heart className="w-5 h-5 text-red-500 mr-2 fill-current" />
-                          <span className="text-gray-700 font-medium">
+                          <span className="text-black font-medium">
                             Avg Likes :{" "}
-                            <span className="text-gray-900">
+                            <span className="text-black">
                               {formatNumber(profile.average_likes)}
                             </span>
                           </span>

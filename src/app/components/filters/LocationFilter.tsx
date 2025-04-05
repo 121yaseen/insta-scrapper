@@ -106,7 +106,7 @@ export default function LocationFilter({
 
   return (
     <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-black mb-2">
         Creator Location
       </label>
 
@@ -136,7 +136,7 @@ export default function LocationFilter({
           onClick={() => setIsOpen(!isOpen)}
         >
           <div className="flex items-center justify-between">
-            <span className="text-gray-500">
+            <span className="text-black">
               {selectedLocations.length > 0
                 ? `${selectedLocations.length} location${
                     selectedLocations.length !== 1 ? "s" : ""
@@ -144,7 +144,7 @@ export default function LocationFilter({
                 : "Select locations"}
             </span>
             <ChevronDown
-              className={`h-4 w-4 text-gray-500 transition-transform ${
+              className={`h-4 w-4 text-black transition-transform ${
                 isOpen ? "transform rotate-180" : ""
               }`}
             />
@@ -160,26 +160,26 @@ export default function LocationFilter({
                 placeholder="Search locations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="text-black w-full px-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
 
             {isLoading ? (
-              <div className="px-4 py-2 text-center text-gray-500">
+              <div className="px-4 py-2 text-center text-black">
                 Loading locations...
               </div>
             ) : error ? (
               <div className="px-4 py-2 text-center text-red-500">{error}</div>
             ) : filteredLocations.length === 0 ? (
-              <div className="px-4 py-2 text-center text-gray-500">
+              <div className="px-4 py-2 text-center text-black">
                 No locations found
               </div>
             ) : (
               filteredLocations.map((location) => (
                 <div
                   key={location.id}
-                  className={`px-4 py-2 cursor-pointer flex justify-between items-center hover:bg-purple-50 ${
+                  className={`text-black px-4 py-2 cursor-pointer flex justify-between items-center hover:bg-purple-50 ${
                     selectedLocations.includes(location.id)
                       ? "bg-purple-50"
                       : ""

@@ -80,7 +80,7 @@ export default function RangeFilter({
 
   return (
     <div className="space-y-2">
-      <label className="block text-gray-700 font-medium">{label}</label>
+      <label className="block text-black font-medium">{label}</label>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Min dropdown */}
@@ -90,7 +90,7 @@ export default function RangeFilter({
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
           >
             <span>{formatNumber(value.min)}</span>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {showMinDropdown && (
@@ -98,7 +98,7 @@ export default function RangeFilter({
               {minOptions.map((option) => (
                 <div
                   key={option}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => handleMinChange(option)}
                 >
                   {formatNumber(option)}
@@ -115,7 +115,7 @@ export default function RangeFilter({
             className="w-full flex items-center justify-between border border-gray-200 rounded-lg p-3 bg-white"
           >
             <span>{formatNumber(value.max)}</span>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-black" />
           </button>
 
           {showMaxDropdown && (
@@ -123,7 +123,7 @@ export default function RangeFilter({
               {maxOptions.map((option) => (
                 <div
                   key={option}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
                   onClick={() => handleMaxChange(option)}
                 >
                   {formatNumber(option)}
