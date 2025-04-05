@@ -42,7 +42,7 @@ export default function Home() {
             <div className="flex items-center">
               <Image
                 src="/images/pistah.svg"
-                alt="InstaScrapr Logo"
+                alt="Pistah Logo"
                 width={120}
                 height={40}
                 priority
@@ -172,7 +172,7 @@ export default function Home() {
               <div className="flex items-center">
                 <Image
                   src="/images/pistah.svg"
-                  alt="InstaScrapr Logo"
+                  alt="Pistah Logo"
                   width={100}
                   height={35}
                 />
@@ -201,7 +201,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-200 text-center text-gray-500">
-            &copy; {new Date().getFullYear()} InstaScrapr. All rights reserved.
+            &copy; {new Date().getFullYear()} Pistah. All rights reserved.
           </div>
         </div>
       </footer>

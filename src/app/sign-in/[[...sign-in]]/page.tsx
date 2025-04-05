@@ -9,7 +9,7 @@ export default function SignInPage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/images/pistah.svg"
-              alt="InstaScrapr Logo"
+              alt="Pistah Logo"
               width={140}
               height={50}
               priority
@@ -17,7 +17,7 @@ export default function SignInPage() {
           </div>
           <h1 className="text-4xl font-bold mb-2">Sign In</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Welcome back to InstaScrapr
+            Welcome back to Pistah
           </p>
         </div>
         <SignIn redirectUrl="/dashboard" />

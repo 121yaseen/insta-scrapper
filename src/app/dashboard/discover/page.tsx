@@ -23,7 +23,7 @@ import {
 } from "@/services/discoverService";
 import FilterPanel from "@/app/components/filters/FilterPanel";
 
-export default function DiscoverPage() {
+const DiscoverPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<string | null>(null);
@@ -273,7 +273,7 @@ export default function DiscoverPage() {
             <Link href="/" className="flex items-center">
               <Image
                 src="/images/pistah.svg"
-                alt="InstaScrapr Logo"
+                alt="Pistah Logo"
                 width={120}
                 height={40}
                 priority
@@ -695,16 +695,18 @@ export default function DiscoverPage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/images/pistah.svg"
-              alt="InstaScrapr Logo"
+              alt="Pistah Logo"
               width={100}
               height={35}
             />
           </div>
           <p className="text-gray-500">
-            &copy; {new Date().getFullYear()} InstaScrapr. All rights reserved.
+            &copy; {new Date().getFullYear()} Pistah. All rights reserved.
           </p>
         </div>
       </footer>
     </div>
   );
-}
+};
+
+export default DiscoverPage;

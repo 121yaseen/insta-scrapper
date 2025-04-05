@@ -9,7 +9,7 @@ export default function SignUpPage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/images/pistah.svg"
-              alt="InstaScrapr Logo"
+              alt="Pistah Logo"
               width={140}
               height={50}
               priority
@@ -17,7 +17,7 @@ export default function SignUpPage() {
           </div>
           <h1 className="text-4xl font-bold mb-2">Sign Up</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Create your account to access InstaScrapr
+            Create your account to access Pistah
           </p>
         </div>
         <SignUp redirectUrl="/dashboard" />

@@ -23,7 +23,7 @@ export default function DashboardLayout({
             <Link href="/dashboard" className="flex items-center">
               <Image
                 src="/images/pistah.svg"
-                alt="InstaScrapr Logo"
+                alt="Pistah Logo"
                 width={120}
                 height={40}
                 priority
