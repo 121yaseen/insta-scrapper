@@ -3,6 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { InstagramScraper } from "@/services/instagram-scraper";
 
+// Mark this route as dynamic to prevent build errors
+export const dynamic = "force-dynamic";
+
 export async function GET(
   req: NextRequest,
   context: { params: { username: string } }

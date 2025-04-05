@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Mark this route as dynamic to prevent build errors
+export const dynamic = "force-dynamic";
+
 // Cache the locations data to avoid making too many requests
 let cachedLocations: any[] | null = null;
 let lastFetchTime: number = 0;

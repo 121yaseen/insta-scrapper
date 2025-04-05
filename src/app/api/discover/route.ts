@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+// Mark this route as dynamic to prevent build errors
+export const dynamic = "force-dynamic";
+
 // Import types from our service
 import { ApiResponse } from "@/services/discoverService";
 

@@ -14,6 +14,9 @@ let metadataCache: Record<
 > = {};
 const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 
+// Mark this route as dynamic to prevent build errors
+export const dynamic = "force-dynamic";
+
 /**
  * GET handler for fetching YouTube video metadata
  */

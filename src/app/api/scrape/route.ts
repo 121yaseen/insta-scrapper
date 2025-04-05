@@ -3,6 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
+// Mark this route as dynamic to prevent build errors
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     // Get authenticated user

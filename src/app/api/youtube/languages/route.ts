@@ -1,60 +1,76 @@
 import { NextResponse } from "next/server";
-import { fetchYouTubeVideoData } from "@/services/youtubeService";
 
-// Cache to prevent excessive API calls
-let languagesCache: {
-  data: { code: string; name: string }[];
-  timestamp: number;
-} | null = null;
+// Mark this route as dynamic to prevent build errors
+export const dynamic = "force-dynamic";
 
+// Define types for language data
+interface Language {
+  code: string;
+  name: string;
+}
+
+// Cache for languages to avoid excessive API requests
+let languagesCache: Language[] | null = null;
+let lastFetchTime = 0;
 const CACHE_DURATION = 86400000; // 24 hours in milliseconds
-const SAMPLE_VIDEO_ID = "W5WgPebBKqw"; // Sample video to get languages from
 
 /**
  * GET handler for fetching all available YouTube languages
  */
 export async function GET() {
   try {
-    const currentTime = Date.now();
-
-    // Check if we have valid cached data
-    if (
-      languagesCache &&
-      currentTime - languagesCache.timestamp < CACHE_DURATION
-    ) {
-      return NextResponse.json({ languages: languagesCache.data });
+    // Use cache if it's fresh
+    const now = Date.now();
+    if (languagesCache && now - lastFetchTime < CACHE_DURATION) {
+      return NextResponse.json({ languages: languagesCache });
     }
 
-    // Fetch fresh data from YouTube
-    const videoData = await fetchYouTubeVideoData(SAMPLE_VIDEO_ID);
-
-    if (
-      !videoData ||
-      !videoData.availableLanguages ||
-      videoData.availableLanguages.length === 0
-    ) {
-      return NextResponse.json(
-        { error: "Failed to fetch language data" },
-        { status: 500 }
-      );
-    }
-
-    // Sort languages alphabetically by name
-    const sortedLanguages = [...videoData.availableLanguages].sort((a, b) =>
-      a.name.localeCompare(b.name)
+    // Otherwise fetch from YouTube API
+    const response = await fetch(
+      "https://www.googleapis.com/youtube/v3/i18nLanguages?part=snippet&key=" +
+        process.env.YOUTUBE_API_KEY
     );
 
-    // Store in cache
-    languagesCache = {
-      data: sortedLanguages,
-      timestamp: currentTime,
-    };
+    if (!response.ok) {
+      throw new Error(`Error fetching languages: ${response.status}`);
+    }
 
-    return NextResponse.json({ languages: sortedLanguages });
+    const data = await response.json();
+
+    // Add null check for items array
+    if (!data.items || !Array.isArray(data.items)) {
+      throw new Error("Invalid response format from YouTube API");
+    }
+
+    // Process the data
+    const languages: Language[] = data.items
+      .map((item: any) => {
+        // Add null checks to prevent errors
+        if (!item || !item.id || !item.snippet || !item.snippet.name) {
+          return null;
+        }
+
+        return {
+          code: item.id,
+          name: item.snippet.name,
+        };
+      })
+      .filter(Boolean) as Language[]; // Remove any null entries
+
+    // Update cache
+    languagesCache = languages;
+    lastFetchTime = now;
+
+    return NextResponse.json({ languages });
   } catch (error) {
-    console.error("Error in YouTube languages API route:", error);
+    console.error("Error fetching YouTube languages:", error);
+
+    // Return an empty array instead of failing completely
     return NextResponse.json(
-      { error: "Failed to process request" },
+      {
+        languages: [],
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
