@@ -162,11 +162,9 @@ def login_to_instagram(driver, username, password):
 
     except TimeoutException as e:
         print(f"Login failed: Timed out waiting for element. {e}")
-        # driver.save_screenshot('login_error.png') # Optional: save screenshot for debugging
         return False
     except Exception as e:
         print(f"An unexpected error occurred during login: {e}")
-        # driver.save_screenshot('login_unexpected_error.png')
         return False
 
 def parse_count(text):
@@ -357,11 +355,6 @@ def scrape_reels_info(driver, username):
             print(f"Navigating directly to reels URL: {reels_url}")
             driver.get(reels_url)
             time.sleep(7)  # Increased wait time for reels to load
-        
-        # Take a screenshot for debugging
-        debug_screenshot = f"{username}_reels_page.png"
-        driver.save_screenshot(debug_screenshot)
-        print(f"Saved reels page screenshot to {debug_screenshot}")
         
         # Scroll down multiple times to ensure all reels load
         for _ in range(3):  # Scroll down 3 times
