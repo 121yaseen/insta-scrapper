@@ -1967,5 +1967,112 @@
         "posted_date": null
       }
     ]
+  },
+  {
+    "username": "clevertypeai",
+    "scrape_time": "2025-04-06 13:51:49",
+    "full_name": "clevertypeai",
+    "is_verified": false,
+    "bio": "",
+    "external_url": null,
+    "profile_pic_url": "https://instagram.fccj2-1.fna.fbcdn.net/v/t51.2885-19/454646491_8366075823413259_3360865279367296889_n.jpg?_nc_ht=instagram.fccj2-1.fna.fbcdn.net&_nc_cat=103&_nc_oc=Q6cZ2QGW7B_uSFrOQ-AkIRuuTSzmFouI7sEB4fTzU48bg3cLnK5Jl8mnuZqavnQWn8fNMSwuXTx2XBcv0zcdAXAeucum&_nc_ohc=WmLWfr27x5MQ7kNvwETsNWr&_nc_gid=rqTJMXfYlDf3tqFgf6bE_Q&edm=AP4sbd4BAAAA&ccb=7-5&oh=00_AfG54RrijSH-DhGQD28J-znpSNagW2QuzoTL7CPqcM7SJg&oe=67F802DC&_nc_sid=7a9f4b",
+    "is_private": false,
+    "posts_count": 102,
+    "followers_count": 8203,
+    "following_count": 0,
+    "recent_posts": [],
+    "reels_count": 10,
+    "reels": [
+      {
+        "id": "DHp47EhvDkJ",
+        "url": "https://www.instagram.com/clevertypeai/reel/DHp47EhvDkJ/",
+        "thumbnail": null,
+        "views": 10300,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DHnziM7P0Ry",
+        "url": "https://www.instagram.com/clevertypeai/reel/DHnziM7P0Ry/",
+        "thumbnail": null,
+        "views": 1700000,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DHTqWx3v8kE",
+        "url": "https://www.instagram.com/clevertypeai/reel/DHTqWx3v8kE/",
+        "thumbnail": null,
+        "views": 17200,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DHATkAlPSY7",
+        "url": "https://www.instagram.com/clevertypeai/reel/DHATkAlPSY7/",
+        "thumbnail": null,
+        "views": 9238,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DGMmq7HvJi9",
+        "url": "https://www.instagram.com/clevertypeai/reel/DGMmq7HvJi9/",
+        "thumbnail": null,
+        "views": 8642,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DGAqeb6vaxf",
+        "url": "https://www.instagram.com/clevertypeai/reel/DGAqeb6vaxf/",
+        "thumbnail": null,
+        "views": 1700000,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DGAMV1RNf8G",
+        "url": "https://www.instagram.com/clevertypeai/reel/DGAMV1RNf8G/",
+        "thumbnail": null,
+        "views": 12600,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DF9Z97ytS-c",
+        "url": "https://www.instagram.com/clevertypeai/reel/DF9Z97ytS-c/",
+        "thumbnail": null,
+        "views": 659,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DFcFSAjT2-6",
+        "url": "https://www.instagram.com/clevertypeai/reel/DFcFSAjT2-6/",
+        "thumbnail": null,
+        "views": 20300,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      },
+      {
+        "id": "DEAvYTWzYO0",
+        "url": "https://www.instagram.com/clevertypeai/reel/DEAvYTWzYO0/",
+        "thumbnail": null,
+        "views": 768,
+        "likes": null,
+        "comments": null,
+        "posted_date": null
+      }
+    ]
   }
 ]

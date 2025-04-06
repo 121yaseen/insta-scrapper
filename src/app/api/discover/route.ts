@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { SearchService } from "@/services/search/SearchService";
+import { SearchQuery } from "@/services/search/interfaces/SearchQuery";
+import { ImpulzeProvider } from "@/services/search/providers/ImpulzeProvider";
 
 // Mark this route as dynamic to prevent build errors
 export const dynamic = "force-dynamic";
-
-// Import types from our service
-import { ApiResponse } from "@/services/discoverService";
 
 // Default parameters
 const defaultParams = {
@@ -20,6 +20,10 @@ const defaultParams = {
   offset: 0,
 };
 
+// Fallback access token
+const FALLBACK_ACCESS_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YyMThhYTgyY2VhMTIxNGY2ZDUzOTkiLCJpYXQiOjE3NDM5MTkyNzQsImV4cCI6MTc3NTQ1NTI3NH0.8QetT4C_Bf1yQxh0p0dRL_y2QhYonYQ1IllZi4PyihI";
+
 // Map our internal sort fields to the external API's expected fields
 const mapSortField = (field: string): string => {
   switch (field) {
@@ -33,14 +37,17 @@ const mapSortField = (field: string): string => {
   }
 };
 
-export async function POST(request: Request) {
+/**
+ * Direct implementation of the Impulze API call without using the search service
+ * This ensures we have a working fallback if the search service has issues
+ */
+async function directImpulzeCall(requestParams: any): Promise<any> {
   try {
-    // Extract request parameters from the client
-    const requestParams = await request.json();
+    console.log("Making direct Impulze API call");
 
-    // Only include essential parameters for the external API request
+    // Format the request body exactly as in the original implementation
     const apiParams: any = {
-      platform: "instagram",
+      platform: requestParams.platform || "instagram",
       sort_by: {
         field: requestParams.sort_by?.field || "FOLLOWER_COUNT",
         order: requestParams.sort_by?.order || "DESCENDING",
@@ -64,7 +71,7 @@ export async function POST(request: Request) {
       offset: requestParams.offset || 0,
     };
 
-    // Format creator_locations if needed (this is a key parameter from the successful request)
+    // Add optional parameters if they exist
     if (
       Array.isArray(requestParams.creator_locations) &&
       requestParams.creator_locations.length > 0
@@ -72,12 +79,10 @@ export async function POST(request: Request) {
       apiParams.creator_locations = requestParams.creator_locations;
     }
 
-    // Add creator_language if specified (for Malayalam language support)
     if (requestParams.creator_language) {
       apiParams.creator_language = requestParams.creator_language;
     }
 
-    // Handle search parameters if present
     if (requestParams.username) {
       apiParams.username = requestParams.username;
     }
@@ -86,9 +91,9 @@ export async function POST(request: Request) {
       apiParams.searchField = requestParams.searchField;
     }
 
-    console.log("API request params:", JSON.stringify(apiParams));
+    console.log("Direct API request params:", JSON.stringify(apiParams));
 
-    // Make the external API call from the server
+    // Make the request with all needed headers
     const response = await fetch(
       "https://apigw.impulze.ai/api/v1/customer/discoverProfiles",
       {
@@ -109,31 +114,21 @@ export async function POST(request: Request) {
           "sec-fetch-site": "same-site",
           "user-agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
-          "x-access-token":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YyMThhYTgyY2VhMTIxNGY2ZDUzOTkiLCJpYXQiOjE3NDM5MTkyNzQsImV4cCI6MTc3NTQ1NTI3NH0.8QetT4C_Bf1yQxh0p0dRL_y2QhYonYQ1IllZi4PyihI",
+          "x-access-token": FALLBACK_ACCESS_TOKEN,
         },
         body: JSON.stringify(apiParams),
       }
     );
 
     if (!response.ok) {
-      // Add status code and response text to error for debugging
       const responseText = await response.text();
 
-      // Try to parse the response if it's JSON
       try {
         const errorData = JSON.parse(responseText);
 
-        // Check for access limit error (code 423)
         if (response.status === 423 || errorData?.name === "AccessLimited") {
-          return NextResponse.json(
-            {
-              error:
-                "Access limited: You've reached your API usage limit. Please try again later or upgrade your plan.",
-              name: errorData?.name || "AccessLimited",
-              field: errorData?.field || "influencerSearch",
-            },
-            { status: 423 }
+          throw new Error(
+            "Access limited: You've reached your API usage limit. Please try again later or upgrade your plan."
           );
         }
       } catch (e) {
@@ -145,10 +140,125 @@ export async function POST(request: Request) {
       );
     }
 
-    // Parse and return the API response
-    const data = await response.json();
+    // Return the raw API response
+    return await response.json();
+  } catch (error) {
+    console.error("Error in direct Impulze API call:", error);
+    throw error;
+  }
+}
 
-    return NextResponse.json(data);
+export async function POST(request: Request) {
+  try {
+    console.log("Discover API endpoint called");
+
+    // Extract request parameters from the client
+    const requestParams = await request.json();
+    console.log("Request parameters:", JSON.stringify(requestParams));
+
+    // Try three approaches in sequence to ensure we get a response
+    let result;
+    let responseData;
+
+    try {
+      // 1. First try direct Impulze API call (most reliable)
+      const directResponse = await directImpulzeCall(requestParams);
+      console.log(
+        `Direct API call returned ${directResponse?.data?.length || 0} profiles`
+      );
+
+      // Format the response for the client
+      return NextResponse.json(directResponse);
+    } catch (directError) {
+      console.error(
+        "Direct API call failed, trying our provider:",
+        directError
+      );
+
+      try {
+        // 2. Try using our ImpulzeProvider
+        // Map request parameters to our standardized SearchQuery format
+        const searchQuery: SearchQuery = {
+          platform: requestParams.platform || "instagram",
+          sortBy: {
+            field: requestParams.sort_by?.field || "FOLLOWER_COUNT",
+            order: requestParams.sort_by?.order || "DESCENDING",
+          },
+          hasContactDetails: requestParams.has_contact_details,
+          isVerified: requestParams.is_verified,
+          hasSponsoredPosts: requestParams.has_sponsored_posts,
+          includeBusinessAccounts: requestParams.include_business_accounts,
+          offset: requestParams.offset || 0,
+          limit: requestParams.limit || 20,
+          username: requestParams.username,
+          searchField: requestParams.searchField,
+          creatorLocations: requestParams.creator_locations,
+          creatorLanguage: requestParams.creator_language,
+        };
+
+        // Use the Impulze provider directly
+        const impulzeProvider = new ImpulzeProvider({
+          accessToken: FALLBACK_ACCESS_TOKEN,
+        });
+
+        result = await impulzeProvider.search(searchQuery);
+        console.log(
+          `Impulze provider returned ${result.profiles.length} profiles`
+        );
+
+        // Transform the result to match the expected format for the client
+        responseData = {
+          message: "Success",
+          data: result.profiles.map((profile) => ({
+            // Map our standard profile format back to the client-expected format
+            work_platform: {
+              id: profile.platform,
+              name:
+                profile.platform.charAt(0).toUpperCase() +
+                profile.platform.slice(1),
+            },
+            platform_username: profile.platformUsername,
+            external_id: profile.externalId,
+            url: profile.url,
+            image_url: profile.imageUrl,
+            full_name: profile.fullName,
+            introduction: profile.introduction,
+            is_verified: profile.isVerified,
+            platform_account_type: profile.accountType,
+            gender: profile.gender,
+            age_group: profile.ageGroup,
+            language: profile.language,
+            follower_count: profile.followerCount,
+            subscriber_count: profile.subscriberCount,
+            content_count: profile.contentCount,
+            engagement_rate: profile.engagementRate,
+            average_likes: profile.averageLikes,
+            average_views: profile.averageViews,
+            creator_location: profile.location,
+            contact_details: profile.contactDetails,
+            filter_match: profile.metadata?.filterMatch || {},
+            livestream_metrics: profile.metadata?.livestreamMetrics || {},
+          })),
+          metadata: {
+            totalCount: result.totalCount,
+            provider: result.provider,
+          },
+          nextPageToken: result.nextPageToken,
+        };
+
+        return NextResponse.json(responseData);
+      } catch (providerError) {
+        console.error("Provider approach failed:", providerError);
+
+        // If we get here, both approaches failed
+        return NextResponse.json(
+          {
+            error: "All API request approaches failed. Please try again later.",
+          },
+          { status: 500 }
+        );
+      }
+    }
   } catch (error) {
     console.error("Error in discover API:", error);
 
