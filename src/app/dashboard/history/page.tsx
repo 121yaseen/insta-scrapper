@@ -223,10 +223,14 @@ export default function HistoryPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             {request.profilePicUrl ? (
-                              <img
-                                src={request.profilePicUrl}
+                              <Image
+                                src={`/api/image-proxy?url=${encodeURIComponent(
+                                  request.profilePicUrl
+                                )}`}
                                 alt={`@${request.username}`}
-                                className="w-8 h-8 rounded-full object-cover mr-3"
+                                width={32}
+                                height={32}
+                                className="rounded-full object-cover mr-3"
                               />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
