@@ -60,7 +60,7 @@ export default function Home() {
                 <>
                   <Link
                     href="/sign-in"
-                    className="px-6 py-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                    className="px-6 py-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors text-black"
                   >
                     Sign In
                   </Link>
