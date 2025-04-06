@@ -223,18 +223,34 @@ export default function HistoryPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             {request.profilePicUrl ? (
-                              <Image
-                                src={`/api/image-proxy?url=${encodeURIComponent(
-                                  request.profilePicUrl
-                                )}`}
-                                alt={`@${request.username}`}
-                                width={32}
-                                height={32}
-                                className="rounded-full object-cover mr-3"
-                              />
+                              <div className="relative w-8 h-8 rounded-full overflow-hidden mr-3">
+                                <Image
+                                  src={`/api/image-proxy?url=${encodeURIComponent(
+                                    request.profilePicUrl
+                                  )}`}
+                                  alt={`@${request.username}`}
+                                  width={32}
+                                  height={32}
+                                  className="object-cover"
+                                  onError={(e) => {
+                                    // On error, replace with fallback
+                                    e.currentTarget.style.display = "none";
+                                    // Show the fallback initial
+                                    const parent =
+                                      e.currentTarget.parentElement;
+                                    if (parent) {
+                                      parent.classList.add("bg-purple-100");
+                                      parent.innerHTML = `<span class="text-xs text-purple-500 font-semibold absolute inset-0 flex items-center justify-center">${request.username
+                                        .charAt(0)
+                                        .toUpperCase()}</span>`;
+                                    }
+                                  }}
+                                  unoptimized
+                                />
+                              </div>
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-                                <span className="text-xs text-gray-500">
+                              <div className="w-8 h-8 rounded-full bg-purple-100 mr-3 flex items-center justify-center">
+                                <span className="text-xs text-purple-500 font-semibold">
                                   {request.username.charAt(0).toUpperCase()}
                                 </span>
                               </div>
