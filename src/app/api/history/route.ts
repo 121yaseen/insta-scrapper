@@ -44,29 +44,62 @@ export async function GET() {
           select: {
             username: true,
             profilePicUrl: true,
+            id: true,
+            lastScraped: true,
           },
         },
       },
     });
 
+    // Fetch all completed scrape requests to cross-reference
+    const completedScrapeRequests = await prisma.scrapeRequest.findMany({
+      where: {
+        status: "completed",
+        username: {
+          in: userRequests.map((req) => req.username),
+        },
+      },
+    });
+
+    // Create a map of completed usernames for quick lookup
+    const completedUsernames = new Set(
+      completedScrapeRequests.map((req) => req.username)
+    );
+
     return NextResponse.json({
-      scrapeRequests: userRequests.map((req) => ({
-        id: req.queuedRequest?.scrapeRequest?.id || req.id,
-        username: req.username,
-        status:
-          req.queuedRequest?.scrapeRequest?.status ||
-          (req.queuedRequest
-            ? req.queuedRequest.status
-            : req.instagramProfile
-            ? "completed"
-            : "pending"),
-        createdAt: req.createdAt,
-        updatedAt: req.queuedRequest?.updatedAt || req.createdAt,
-        error: req.queuedRequest?.scrapeRequest?.error,
-        profilePicUrl: req.instagramProfile?.profilePicUrl,
-        lastQueued: req.queuedRequest?.lastQueued,
-        queuedRequestId: req.queuedRequest?.id,
-      })),
+      scrapeRequests: userRequests.map((req) => {
+        // If we have an Instagram profile and the username is in our completed set, it's definitely completed
+        const isCompleted =
+          !!req.instagramProfile || completedUsernames.has(req.username);
+
+        // Determine the correct status
+        let status = req.queuedRequest?.scrapeRequest?.status;
+        if (!status) {
+          status = req.queuedRequest?.status;
+        }
+
+        // If we have evidence of completion but status is still pending, override it
+        if (isCompleted && (!status || status === "pending")) {
+          status = "completed";
+        }
+
+        // If no status is determined yet, use pending as fallback
+        if (!status) {
+          status = "pending";
+        }
+
+        return {
+          id: req.queuedRequest?.scrapeRequest?.id || req.id,
+          username: req.username,
+          status: status,
+          createdAt: req.createdAt,
+          updatedAt: req.queuedRequest?.updatedAt || req.createdAt,
+          error: req.queuedRequest?.scrapeRequest?.error,
+          profilePicUrl: req.instagramProfile?.profilePicUrl,
+          lastQueued: req.queuedRequest?.lastQueued,
+          queuedRequestId: req.queuedRequest?.id,
+        };
+      }),
     });
   } catch (error) {
     console.error("Error fetching scrape history:", error);
