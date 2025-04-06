@@ -127,9 +127,14 @@ export class ModashProvider extends BaseProvider {
     if (query.sortBy?.field) {
       modashQuery.sort = {
         field: this.mapSortField(query.sortBy.field),
-        direction: query.sortBy.order?.toLowerCase() === "ascending" ? "asc" : "desc"
+        direction:
+          query.sortBy.order?.toLowerCase() === "ascending" ? "asc" : "desc",
       };
-      console.log(`MODASH PROVIDER: Using sort parameters: ${JSON.stringify(modashQuery.sort)}`);
+      console.log(
+        `MODASH PROVIDER: Using sort parameters: ${JSON.stringify(
+          modashQuery.sort
+        )}`
+      );
     }
 
     console.log("Modash API parameters:", JSON.stringify(modashQuery));
@@ -142,39 +147,11 @@ export class ModashProvider extends BaseProvider {
   protected async executeSearch(providerQuery: any): Promise<any> {
     console.log("MODASH PROVIDER: Beginning executeSearch method");
 
-    // Use a simplified request body (matching the successful curl request)
-    const rawBody = JSON.stringify({
-      page: 0,
-      filters: {
-        influencer: {
-          accountTypes: [],
-          location: [],
-          hasContactDetails: [],
-          relevance: {
-            usernames: [],
-            hashtags: [],
-          },
-          textTags: [],
-          interests: [],
-          keywords: "",
-          brands: [],
-        },
-        audience: {
-          location: [],
-          age: [],
-          interests: [],
-          brands: [],
-        },
-        actions: [],
-        options: {
-          showSavedProfiles: true,
-        },
-        relevanceType: "relevance",
-      },
-      sort: {},
-    });
+    // Use the query parameters provided by transformQuery instead of hardcoded values
+    // to ensure sort parameters are properly included
+    const rawBody = JSON.stringify(providerQuery);
 
-    console.log("MODASH PROVIDER: Using raw body that worked in curl");
+    console.log("MODASH PROVIDER: Using request body:", rawBody);
 
     // Prepare headers to match the successful curl request exactly
     const headers: Record<string, string> = {

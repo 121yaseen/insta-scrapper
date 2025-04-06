@@ -190,7 +190,14 @@ export async function POST(request: Request) {
     const requestParams = await request.json();
     console.log("Request parameters:", JSON.stringify(requestParams));
 
-    // No need to extract cookies from the request anymore
+    // Log sort parameters specifically for debugging
+    console.log(
+      "Sort parameters:",
+      JSON.stringify({
+        field: requestParams.sort_by?.field || "FOLLOWER_COUNT",
+        order: requestParams.sort_by?.order || "DESCENDING",
+      })
+    );
 
     // Try three approaches in sequence to ensure we get a response
     let result;
