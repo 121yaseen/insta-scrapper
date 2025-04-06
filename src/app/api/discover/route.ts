@@ -110,7 +110,7 @@ export async function POST(request: Request) {
           "user-agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
           "x-access-token":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YxODdlMzQ3NjcxMmQwNWRjNmQzOGMiLCJpYXQiOjE3NDM4ODIyMTIsImV4cCI6MTc3NTQxODIxMn0.uucICA_EB30OKhTqwHNj1VCgpLX8xMF2E3f1vFETeZE",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YyMThhYTgyY2VhMTIxNGY2ZDUzOTkiLCJpYXQiOjE3NDM5MTkyNzQsImV4cCI6MTc3NTQ1NTI3NH0.8QetT4C_Bf1yQxh0p0dRL_y2QhYonYQ1IllZi4PyihI",
         },
         body: JSON.stringify(apiParams),
       }

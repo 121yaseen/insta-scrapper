@@ -5,7 +5,7 @@ interface Location {
 
 // Function to fetch locations with token authentication if needed
 export async function fetchLocationsWithAuth(
-  token: string
+  token: string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YyMThhYTgyY2VhMTIxNGY2ZDUzOTkiLCJpYXQiOjE3NDM5MTkyNzQsImV4cCI6MTc3NTQ1NTI3NH0.8QetT4C_Bf1yQxh0p0dRL_y2QhYonYQ1IllZi4PyihI"
 ): Promise<Location[]> {
   try {
     const response = await fetch(
