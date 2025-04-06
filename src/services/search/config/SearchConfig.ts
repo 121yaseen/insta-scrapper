@@ -70,6 +70,14 @@ const DEFAULT_CONFIG: SearchServiceConfig = {
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2YyMThhYTgyY2VhMTIxNGY2ZDUzOTkiLCJpYXQiOjE3NDM5MTkyNzQsImV4cCI6MTc3NTQ1NTI3NH0.8QetT4C_Bf1yQxh0p0dRL_y2QhYonYQ1IllZi4PyihI",
       },
     },
+    {
+      id: "modash",
+      enabled: true,
+      priority: 2,
+      settings: {
+        // Cookies will be passed from the API request
+      },
+    },
     // Mock provider is disabled by default in production
     {
       id: "mock",

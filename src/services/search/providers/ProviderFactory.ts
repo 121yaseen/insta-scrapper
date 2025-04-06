@@ -2,6 +2,7 @@ import { ISearchProvider } from "../interfaces/ISearchProvider";
 import { ProviderConfig } from "../config/SearchConfig";
 import { ImpulzeProvider } from "./ImpulzeProvider";
 import { MockProvider } from "./MockProvider";
+import { ModashProvider } from "./ModashProvider";
 
 /**
  * Factory for creating search provider instances
@@ -16,6 +17,7 @@ export class ProviderFactory {
   > = {
     impulze: ImpulzeProvider,
     mock: MockProvider,
+    modash: ModashProvider,
   };
 
   /**

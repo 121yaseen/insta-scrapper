@@ -10,6 +10,7 @@ export type { SearchResult, ProfileData } from "./interfaces/SearchResult";
 export { BaseProvider } from "./providers/BaseProvider";
 export { ImpulzeProvider } from "./providers/ImpulzeProvider";
 export { MockProvider } from "./providers/MockProvider";
+export { ModashProvider } from "./providers/ModashProvider";
 export { ProviderFactory } from "./providers/ProviderFactory";
 
 // Aggregator

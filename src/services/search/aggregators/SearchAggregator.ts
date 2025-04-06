@@ -274,12 +274,24 @@ export class SearchAggregator {
     providers: ISearchProvider[],
     query: SearchQuery
   ): Promise<SearchResult> {
+    console.log("============================================");
+    console.log("AGGREGATOR: Executing ALL providers strategy");
+    console.log(`AGGREGATOR: Total providers count: ${providers.length}`);
+    providers.forEach((p) =>
+      console.log(`AGGREGATOR: Provider: ${p.id}, priority: ${p.priority}`)
+    );
+
     // Execute searches (in parallel or sequence based on config)
     let results: SearchResult[] = [];
 
     if (this.config.parallelExecution) {
+      console.log("AGGREGATOR: Using parallel execution");
       // Execute all provider searches in parallel with timeout
       const searchPromises = providers.map((provider) => {
+        console.log(
+          `AGGREGATOR: Setting up search for provider: ${provider.id}`
+        );
+
         // Create a promise that rejects after timeout
         const timeoutPromise = new Promise<SearchResult>((_, reject) => {
           setTimeout(() => {
@@ -292,26 +304,49 @@ export class SearchAggregator {
         });
 
         // Race the provider search against the timeout
-        return Promise.race([provider.search(query), timeoutPromise]).catch(
-          (error) => ({
-            profiles: [],
-            provider: provider.id,
-            error: {
-              message: error instanceof Error ? error.message : "Unknown error",
-              details: error,
-            },
+        return Promise.race([provider.search(query), timeoutPromise])
+          .then((result) => {
+            console.log(
+              `AGGREGATOR: Provider ${provider.id} returned ${result.profiles.length} profiles`
+            );
+            return result;
           })
-        );
+          .catch((error) => {
+            console.error(
+              `AGGREGATOR: Provider ${provider.id} search failed:`,
+              error
+            );
+            return {
+              profiles: [],
+              provider: provider.id,
+              error: {
+                message:
+                  error instanceof Error ? error.message : "Unknown error",
+                details: error,
+              },
+            };
+          });
       });
 
       results = await Promise.all(searchPromises);
     } else {
+      console.log("AGGREGATOR: Using sequential execution");
       // Execute provider searches sequentially
       for (const provider of providers) {
         try {
+          console.log(
+            `AGGREGATOR: Starting search for provider: ${provider.id}`
+          );
           const result = await provider.search(query);
+          console.log(
+            `AGGREGATOR: Provider ${provider.id} returned ${result.profiles.length} profiles`
+          );
           results.push(result);
         } catch (error) {
+          console.error(
+            `AGGREGATOR: Provider ${provider.id} search failed:`,
+            error
+          );
           results.push({
             profiles: [],
             provider: provider.id,
@@ -324,8 +359,20 @@ export class SearchAggregator {
       }
     }
 
+    console.log(
+      `AGGREGATOR: All providers completed. Results count: ${results.length}`
+    );
+    results.forEach((r) => {
+      console.log(
+        `AGGREGATOR: Provider ${r.provider} returned ${
+          r.profiles.length
+        } profiles${r.error ? ` (with error: ${r.error.message})` : ""}`
+      );
+    });
+
     // Combine results from all providers
     const allProfiles: ProfileData[] = [];
+    const providerIds: string[] = [];
     const errors: Record<string, any> = {};
 
     for (const result of results) {
@@ -333,6 +380,9 @@ export class SearchAggregator {
       if (result.profiles.length > 0) {
         allProfiles.push(...result.profiles);
       }
+
+      // Track which providers contributed results
+      providerIds.push(result.provider);
 
       // Track errors
       if (result.error) {
@@ -342,19 +392,22 @@ export class SearchAggregator {
 
     // Remove duplicate profiles (based on platform + username)
     const uniqueProfiles = this.removeDuplicateProfiles(allProfiles);
+    console.log(
+      `AGGREGATOR: Combined unique profiles: ${uniqueProfiles.length} (from original ${allProfiles.length})`
+    );
 
-    return {
+    const response = {
       profiles: uniqueProfiles,
       totalCount: uniqueProfiles.length,
       provider: "aggregator",
-      error:
-        Object.keys(errors).length > 0
-          ? {
-              message: "Some providers encountered errors",
-              details: errors,
-            }
-          : undefined,
+      providerIds,
+      errors: Object.keys(errors).length > 0 ? errors : undefined,
     };
+
+    console.log("AGGREGATOR: Returning aggregated results");
+    console.log("============================================");
+
+    return response as SearchResult;
   }
 
   /**

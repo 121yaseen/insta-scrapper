@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { SearchService } from "@/services/search/SearchService";
 import { SearchQuery } from "@/services/search/interfaces/SearchQuery";
 import { ImpulzeProvider } from "@/services/search/providers/ImpulzeProvider";
+import { ModashProvider } from "@/services/search/providers/ModashProvider";
+import { AggregationStrategy } from "@/services/search/aggregators/SearchAggregator";
 
 // Mark this route as dynamic to prevent build errors
 export const dynamic = "force-dynamic";
@@ -148,109 +150,157 @@ async function directImpulzeCall(requestParams: any): Promise<any> {
   }
 }
 
+/**
+ * Use the search aggregator with all providers
+ */
+async function useSearchAggregator(searchQuery: SearchQuery): Promise<any> {
+  // Initialize the search service
+  const searchService = await SearchService.getInstance().initialize();
+
+  // Override the aggregation strategy to use ALL providers instead of highest priority only
+  console.log(
+    "Setting aggregation strategy to ALL to ensure both providers are used"
+  );
+  searchService.updateAggregationStrategy(AggregationStrategy.ALL);
+
+  // Create providers with appropriate configuration
+  const impulzeProvider = new ImpulzeProvider({
+    accessToken: FALLBACK_ACCESS_TOKEN,
+  });
+
+  // Create ModashProvider - it now uses hardcoded cookies internally
+  const modashProvider = new ModashProvider();
+  console.log("Created ModashProvider and ImpulzeProvider instances");
+
+  // Register the providers with the search service
+  searchService.addProvider(impulzeProvider);
+  searchService.addProvider(modashProvider);
+  console.log("Registered both providers with search service");
+
+  // Execute search with all providers
+  console.log("Executing search with all providers");
+  return await searchService.search(searchQuery);
+}
+
 export async function POST(request: Request) {
   try {
-    console.log("Discover API endpoint called");
+    console.log("Discover API POST endpoint called");
 
     // Extract request parameters from the client
     const requestParams = await request.json();
     console.log("Request parameters:", JSON.stringify(requestParams));
 
+    // No need to extract cookies from the request anymore
+
     // Try three approaches in sequence to ensure we get a response
     let result;
     let responseData;
 
+    // Map request parameters to our standardized SearchQuery format
+    const searchQuery: SearchQuery = {
+      platform: requestParams.platform || "instagram",
+      sortBy: {
+        field: requestParams.sort_by?.field || "FOLLOWER_COUNT",
+        order: requestParams.sort_by?.order || "DESCENDING",
+      },
+      hasContactDetails: requestParams.has_contact_details,
+      isVerified: requestParams.is_verified,
+      hasSponsoredPosts: requestParams.has_sponsored_posts,
+      includeBusinessAccounts: requestParams.include_business_accounts,
+      offset: requestParams.offset || 0,
+      limit: requestParams.limit || 20,
+      username: requestParams.username,
+      searchField: requestParams.searchField,
+      creatorLocations: requestParams.creator_locations,
+      creatorLanguage: requestParams.creator_language,
+    };
+
+    // If the search includes keywords, add them to extendedParams
+    if (requestParams.keywords) {
+      searchQuery.extendedParams = {
+        keywords: requestParams.keywords,
+      };
+    }
+
     try {
-      // 1. First try direct Impulze API call (most reliable)
-      const directResponse = await directImpulzeCall(requestParams);
-      console.log(
-        `Direct API call returned ${directResponse?.data?.length || 0} profiles`
-      );
+      // Try using the search aggregator with all providers
+      result = await useSearchAggregator(searchQuery);
+      console.log("Aggregator returned", result.profiles.length, "profiles");
 
       // Format the response for the client
-      return NextResponse.json(directResponse);
-    } catch (directError) {
+      responseData = {
+        message: "Success",
+        dataCount: result.profiles.length,
+        totalCount: result.totalCount || result.profiles.length,
+        data: result.profiles.map((profile: any) => ({
+          // Map our standard profile format back to the client-expected format
+          work_platform: {
+            id: profile.platform,
+            name:
+              profile.platform.charAt(0).toUpperCase() +
+              profile.platform.slice(1),
+          },
+          platform_username: profile.platformUsername,
+          external_id: profile.externalId,
+          url: profile.url,
+          image_url: profile.imageUrl,
+          full_name: profile.fullName,
+          introduction: profile.introduction,
+          is_verified: profile.isVerified,
+          platform_account_type: profile.accountType,
+          gender: profile.gender,
+          age_group: profile.ageGroup,
+          language: profile.language,
+          follower_count: profile.followerCount,
+          subscriber_count: profile.subscriberCount,
+          content_count: profile.contentCount,
+          engagement_rate: profile.engagementRate,
+          average_likes: profile.averageLikes,
+          average_views: profile.averageViews,
+          creator_location: profile.location,
+          contact_details: profile.contactDetails,
+          filter_match: profile.metadata?.filterMatch || {},
+          livestream_metrics: profile.metadata?.livestreamMetrics || {},
+        })),
+        metadata: {
+          providers: result.providerIds || [result.provider],
+          totalCount: result.totalCount,
+          providerInfo: `Used ${
+            result.providerIds ? result.providerIds.join(", ") : result.provider
+          } provider(s)`,
+        },
+      };
+
+      console.log(
+        "About to return aggregator response:",
+        JSON.stringify({
+          message: responseData.message,
+          dataCount: responseData.dataCount,
+          totalCount: responseData.totalCount,
+        })
+      );
+
+      return NextResponse.json(responseData);
+    } catch (aggregatorError) {
       console.error(
-        "Direct API call failed, trying our provider:",
-        directError
+        "Search aggregator failed, trying direct Impulze API:",
+        aggregatorError
       );
 
       try {
-        // 2. Try using our ImpulzeProvider
-        // Map request parameters to our standardized SearchQuery format
-        const searchQuery: SearchQuery = {
-          platform: requestParams.platform || "instagram",
-          sortBy: {
-            field: requestParams.sort_by?.field || "FOLLOWER_COUNT",
-            order: requestParams.sort_by?.order || "DESCENDING",
-          },
-          hasContactDetails: requestParams.has_contact_details,
-          isVerified: requestParams.is_verified,
-          hasSponsoredPosts: requestParams.has_sponsored_posts,
-          includeBusinessAccounts: requestParams.include_business_accounts,
-          offset: requestParams.offset || 0,
-          limit: requestParams.limit || 20,
-          username: requestParams.username,
-          searchField: requestParams.searchField,
-          creatorLocations: requestParams.creator_locations,
-          creatorLanguage: requestParams.creator_language,
-        };
-
-        // Use the Impulze provider directly
-        const impulzeProvider = new ImpulzeProvider({
-          accessToken: FALLBACK_ACCESS_TOKEN,
-        });
-
-        result = await impulzeProvider.search(searchQuery);
+        // Fallback to direct Impulze API call
+        const directResponse = await directImpulzeCall(requestParams);
         console.log(
-          `Impulze provider returned ${result.profiles.length} profiles`
+          `Direct API call returned ${
+            directResponse?.data?.length || 0
+          } profiles`
         );
 
-        // Transform the result to match the expected format for the client
-        responseData = {
-          message: "Success",
-          data: result.profiles.map((profile) => ({
-            // Map our standard profile format back to the client-expected format
-            work_platform: {
-              id: profile.platform,
-              name:
-                profile.platform.charAt(0).toUpperCase() +
-                profile.platform.slice(1),
-            },
-            platform_username: profile.platformUsername,
-            external_id: profile.externalId,
-            url: profile.url,
-            image_url: profile.imageUrl,
-            full_name: profile.fullName,
-            introduction: profile.introduction,
-            is_verified: profile.isVerified,
-            platform_account_type: profile.accountType,
-            gender: profile.gender,
-            age_group: profile.ageGroup,
-            language: profile.language,
-            follower_count: profile.followerCount,
-            subscriber_count: profile.subscriberCount,
-            content_count: profile.contentCount,
-            engagement_rate: profile.engagementRate,
-            average_likes: profile.averageLikes,
-            average_views: profile.averageViews,
-            creator_location: profile.location,
-            contact_details: profile.contactDetails,
-            filter_match: profile.metadata?.filterMatch || {},
-            livestream_metrics: profile.metadata?.livestreamMetrics || {},
-          })),
-          metadata: {
-            totalCount: result.totalCount,
-            provider: result.provider,
-          },
-          nextPageToken: result.nextPageToken,
-        };
+        // Format the response for the client
+        return NextResponse.json(directResponse);
+      } catch (directError) {
+        console.error("All API request approaches failed:", directError);
 
-        return NextResponse.json(responseData);
-      } catch (providerError) {
-        console.error("Provider approach failed:", providerError);
-
-        // If we get here, both approaches failed
         return NextResponse.json(
           {
             error: "All API request approaches failed. Please try again later.",
