@@ -139,6 +139,12 @@ export default function HistoryPage() {
                 Dashboard
               </Link>
               <Link
+                href="/dashboard/discover"
+                className="text-gray-600 hover:text-purple-600 transition-colors"
+              >
+                Discover
+              </Link>
+              <Link
                 href="/dashboard/history"
                 className="text-gray-800 hover:text-purple-600 transition-colors font-medium"
               >

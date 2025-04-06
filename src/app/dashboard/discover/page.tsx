@@ -338,13 +338,14 @@ const DiscoverPage = () => {
                       <select
                         value={searchField}
                         onChange={handleSearchFieldChange}
-                        className="border-l border-y border-gray-200 rounded-l-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-sm text-black appearance-none pr-8 font-medium"
+                        className="border-l border-y border-gray-200 rounded-l-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-sm text-black appearance-none pr-10 font-medium h-12"
                         style={{
                           backgroundImage:
                             "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
                           backgroundRepeat: "no-repeat",
                           backgroundPosition: "right 0.5rem center",
                           backgroundSize: "1.2em 1.2em",
+                          minWidth: "140px",
                         }}
                       >
                         <option value="keywords">Keywords</option>
@@ -356,23 +357,27 @@ const DiscoverPage = () => {
                         value={searchTerm}
                         onChange={handleSearchTermChange}
                         placeholder="Search creators..."
-                        className="border-y border-r border-gray-200 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 w-64 text-black"
+                        className="border-y border-r border-gray-200 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 w-72 text-black h-12"
                       />
                       <button
                         type="submit"
                         disabled={!filterChanged && profiles.length > 0}
-                        className={`bg-purple-600 text-white px-4 py-2 rounded-r-lg transition-colors ${
+                        className={`bg-purple-600 text-white px-5 py-3 rounded-r-lg transition-colors h-12 flex items-center justify-center w-16 ${
                           !filterChanged && profiles.length > 0
                             ? "opacity-50 cursor-not-allowed"
                             : "hover:bg-purple-700"
                         }`}
                       >
-                        <Search className="w-4 h-4" />
+                        <Search className="w-5 h-5" />
                       </button>
                     </div>
                   </form>
 
-                  <div className="flex items-center mr-4">
+                  {/* Hide the Verified checkbox */}
+                  <div
+                    className="flex items-center mr-4"
+                    style={{ display: "none" }}
+                  >
                     <input
                       type="checkbox"
                       id="verified"
