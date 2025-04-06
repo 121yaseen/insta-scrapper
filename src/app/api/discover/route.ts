@@ -234,6 +234,56 @@ export async function POST(request: Request) {
       result = await useSearchAggregator(searchQuery);
       console.log("Aggregator returned", result.profiles.length, "profiles");
 
+      // Apply final sorting to ensure the combined results are properly sorted
+      if (searchQuery.sortBy?.field) {
+        console.log(
+          `Applying final sort by ${searchQuery.sortBy.field} in ${searchQuery.sortBy.order} order`
+        );
+
+        // Sort profiles based on the selected criteria
+        result.profiles.sort((a: any, b: any) => {
+          let valueA: number, valueB: number;
+
+          // We can safely use searchQuery.sortBy.field here because we checked it exists above
+          const sortField = searchQuery.sortBy!.field.toUpperCase();
+
+          switch (sortField) {
+            case "ENGAGEMENT_RATE":
+              // Handle possible different formats of engagement rate (some might be percentages, others decimal)
+              valueA = Number(a.engagementRate) || 0;
+              valueB = Number(b.engagementRate) || 0;
+
+              // If values are very different (one might be percentage, other decimal), normalize them
+              if (valueA > 100 && valueB < 1) {
+                valueB = valueB * 100; // Convert decimal to percentage for comparison
+              } else if (valueB > 100 && valueA < 1) {
+                valueA = valueA * 100; // Convert decimal to percentage for comparison
+              }
+              break;
+            case "AVERAGE_LIKES":
+              valueA = Number(a.averageLikes) || 0;
+              valueB = Number(b.averageLikes) || 0;
+              break;
+            case "FOLLOWER_COUNT":
+            default:
+              valueA = Number(a.followerCount) || 0;
+              valueB = Number(b.followerCount) || 0;
+              break;
+          }
+
+          // Apply sort direction (defaulting to DESCENDING if not specified)
+          const multiplier =
+            searchQuery.sortBy!.order?.toUpperCase() === "ASCENDING" ? 1 : -1;
+          return multiplier * (valueA - valueB);
+        });
+
+        console.log("Profiles sorted. First profile's relevant values:", {
+          followerCount: result.profiles[0]?.followerCount,
+          engagementRate: result.profiles[0]?.engagementRate,
+          averageLikes: result.profiles[0]?.averageLikes,
+        });
+      }
+
       // Format the response for the client
       responseData = {
         message: "Success",
